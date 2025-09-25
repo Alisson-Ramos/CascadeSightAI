@@ -1,0 +1,257 @@
+{
+  "name": "BuscaAPIs",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://api.hackathon.souamigu.org.br/capitania-portos/ {{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        832
+      ],
+      "id": "98e289a3-8a5a-44c7-9122-118b5adf25af",
+      "name": "CaptaniaDosPortos"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hackathon.souamigu.org.br/anvisa/ {{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        640
+      ],
+      "id": "8fa6ab08-c8c0-43ca-b379-77691a10514f",
+      "name": "Anvisa"
+    },
+    {
+      "parameters": {
+        "url": "https://api.hackathon.souamigu.org.br/armador",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -464,
+        512
+      ],
+      "id": "aa82622b-89c8-40dc-bf10-ca32adf9e108",
+      "name": "Armador"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        512
+      ],
+      "id": "dae289fa-0bb8-4b0f-9c66-645db3d1f597",
+      "name": "Split resultado"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn {\n  data: items\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        496
+      ],
+      "id": "d7478a7a-5170-48ad-89be-911813c258b5",
+      "name": "Formatação"
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "numberInputs": 5,
+        "query": "SELECT * FROM input1 \n  LEFT JOIN input2 ON input1.id = input2.id \n  LEFT JOIN input3 ON input2.id = input3.id\n  LEFT JOIN input4 ON input3.id = input4.id\n  LEFT JOIN input5 ON input4.id = input5.id\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        208,
+        448
+      ],
+      "id": "d4ecaf31-f0f2-41fd-baeb-a349c977030f",
+      "name": "Combina os dados do navio nas APIs"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hackathon.souamigu.org.br/receita-federal/ {{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        352
+      ],
+      "id": "20c25003-bb47-4854-9ae4-69c8b3de9f10",
+      "name": "ReceitaFederal"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hackathon.souamigu.org.br/agencia-maritima/ {{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -16,
+        160
+      ],
+      "id": "28222ea1-ecfd-4cb1-b53b-b48f853f210e",
+      "name": "AgenciaMaritima"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "4b847f6b-c17d-4be0-ab2c-1bfd4ae97425",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -736,
+        512
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "CaptaniaDosPortos": {
+      "main": [
+        [
+          {
+            "node": "Combina os dados do navio nas APIs",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Anvisa": {
+      "main": [
+        [
+          {
+            "node": "Combina os dados do navio nas APIs",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "ReceitaFederal": {
+      "main": [
+        [
+          {
+            "node": "Combina os dados do navio nas APIs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "AgenciaMaritima": {
+      "main": [
+        [
+          {
+            "node": "Combina os dados do navio nas APIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armador": {
+      "main": [
+        [
+          {
+            "node": "Split resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split resultado": {
+      "main": [
+        [
+          {
+            "node": "AgenciaMaritima",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ReceitaFederal",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Anvisa",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CaptaniaDosPortos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Combina os dados do navio nas APIs",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Combina os dados do navio nas APIs": {
+      "main": [
+        [
+          {
+            "node": "Formatação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatação": {
+      "main": [
+        []
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Armador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "05a2f9e4-fb90-4103-8a90-29b2fc26c2b4",
+  "meta": {
+    "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
+  },
+  "id": "60CIQoQafo5FMMSC",
+  "tags": []
+}

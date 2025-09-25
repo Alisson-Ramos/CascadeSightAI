@@ -1,0 +1,327 @@
+{
+  "name": "StackholderGenerico",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        640
+      ],
+      "id": "88da8daf-7d6a-4d08-bbf1-ab1aa4c88f61",
+      "name": "OAI M1",
+      "credentials": {
+        "openAiApi": {
+          "id": "6SDWRvzc9sQJQ48l",
+          "name": "OpenAi account 36"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n// O glossário é definido aqui para ser injetado no prompt.\nconst Glossario = {\n  \"glossarioPortuario\": {\n    \"Agência Marítima\": \"Representa o navio no porto, intermedia atracação e contato com órgãos públicos.\",\n    \"ANVISA\": \"Agência Nacional de Vigilância Sanitária. Fiscaliza saúde da tripulação e cargas.\",\n    \"Armador\": \"Empresa proprietária do navio.\",\n    \"Atracação\": \"Ato de encostar o navio ao cais para operações.\",\n    \"Autoridade Portuária\": \"Entidade que administra a infraestrutura do porto (ex: APS em Santos).\",\n    \"Avaria Grossa\": \"Ato de dividir prejuízos de um incidente entre todos os envolvidos no transporte.\",\n    \"Backlog\": \"Acúmulo de cargas ou operações em atraso.\",\n    \"Berço de Atracação\": \"Local físico designado para atracação do navio.\",\n    \"Bill of Lading (BL)\": \"Documento que comprova a posse e contrato de transporte da carga.\",\n    \"Canal de Acesso\": \"Trecho navegável que liga o mar ao cais do porto.\",\n    \"Carga Conteinerizada\": \"Mercadorias transportadas em contêineres.\",\n    \"Carga Geral\": \"Mercadorias embaladas ou unitizadas, como peças e caixas.\",\n    \"Carga Granel Líquido\": \"Carga líquida a granel, como petróleo, sucos e combustíveis.\",\n    \"Carga Granel Sólido\": \"Produtos sólidos a granel como soja, milho, fertilizantes.\",\n    \"Carga Perigosa (IMO)\": \"Cargas que apresentam risco à saúde ou ao meio ambiente.\",\n    \"Cargas Projeto\": \"Cargas de grande porte ou peso, como turbinas ou transformadores.\",\n    \"Cais\": \"Estrutura onde os navios atracam.\",\n    \"Concessionária Portuária\": \"Empresa que administra uma área do porto mediante concessão.\",\n    \"Container Depot\": \"Local onde são armazenados e mantidos contêineres vazios.\",\n    \"Contêiner\": \"Unidade padronizada para transporte de cargas.\",\n    \"Cubagem\": \"Cálculo de volume da carga em metros cúbicos.\",\n    \"Cut-off\": \"Prazo-limite para entrega da carga ao terminal antes do embarque.\",\n    \"Demurrage (Navio)\": \"Multa paga ao armador por uso extra do navio além do tempo acordado.\",\n    \"Demurrage (Contêiner)\": \"Multa paga por atraso na devolução do contêiner.\",\n    \"Despacho Aduaneiro\": \"Processo de liberação de mercadoria pela Receita Federal.\",\n    \"ETA\": \"Estimated Time of Arrival – previsão de chegada ao porto.\",\n    \"ETB\": \"Estimated Time of Berthing – previsão de atracação.\",\n    \"ETD\": \"Estimated Time of Departure – previsão de saída do porto.\",\n    \"Estufagem\": \"Ato de carregar carga dentro de um contêiner.\",\n    \"Free Time\": \"Período gratuito para uso de equipamento ou infraestrutura antes de cobranças.\",\n    \"Gate In\": \"Entrada da carga ou contêiner no terminal.\",\n    \"Gate Out\": \"Saída da carga ou contêiner no terminal.\",\n    \"ISPS Code\": \"Código internacional de segurança portuária.\",\n    \"Janela de Atracação\": \"Horário reservado para atracação, evitando conflitos entre navios.\",\n    \"Linha de Atracação\": \"Cabos utilizados para fixar o navio ao cais.\",\n    \"Manifesto de Carga\": \"Lista de todas as cargas a bordo do navio.\",\n    \"MAPA (Vigiagro)\": \"Fiscaliza cargas agropecuárias de importação/exportação.\",\n    \"Manobra Portuária\": \"Conjunto de ações para movimentar o navio com segurança no porto.\",\n    \"Navio Feeder\": \"Navio menor que faz conexão entre portos regionais e grandes portos.\",\n    \"NVOCC\": \"Operador que atua como transportador sem possuir navios (frequentemente em contêineres).\",\n    \"Operador Portuário\": \"Empresa que executa a operação de carga e descarga.\",\n    \"Plataforma PSP\": \"Antiga plataforma digital chamada Porto Sem Papel.\",\n    \"Prancha\": \"Período de operação portuária de um navio.\",\n    \"Prático\": \"Profissional que guia o navio nas águas do canal até o cais.\",\n    \"Pull in / Pull out\": \"Movimentos de entrada e saída de navios no berço.\",\n    \"Receita Federal\": \"Órgão responsável pela fiscalização e liberação aduaneira.\",\n    \"Redex\": \"Recinto Especial para Despacho Aduaneiro de Exportação.\",\n    \"Rebocador\": \"Embarcação auxiliar que ajuda nas manobras de atracação/desatracação.\",\n    \"Siscomex\": \"Sistema Integrado de Comércio Exterior.\",\n    \"Tancagem\": \"Área para armazenamento de líquidos graneis, como combustíveis.\",\n    \"Terminal Alfandegado\": \"Local sob controle da Receita onde as cargas aguardam liberação.\",\n    \"Turnaround\": \"Tempo total de permanência do navio no porto, da chegada à saída.\",\n    \"Vessel Schedule\": \"Programação de chegada e saída dos navios.\",\n    \"Vessel Tracking\": \"Rastreamento da posição de navios em tempo real.\"\n  }\n};\n\nconst glossarioString = JSON.stringify(Glossario, null, 2);\n\nconst BuinessPromptLogic = `# PERSONA\nVocê é um especialista em logística portuária e um analista de dados sênior. Sua função é analisar um conjunto de dados brutos sobre navios e transformá-lo em um array de objetos JSON estruturados e inteligentes. Sua análise deve ser precisa, baseada estritamente nos dados de entrada, e suas recomendações devem ser acionáveis.\n\n# CONTEXTO (GLOSSÁRIO)\nUse o glossário a seguir para entender os termos técnicos encontrados nos dados e para formular suas recomendações com a terminologia correta.\n${glossarioString}\n\n# OBJETIVO\nSua missão é processar o array de navios do JSON de entrada e, para cada navio, gerar um objeto JSON correspondente à interface 'ShipData'. O resultado final deve ser um array contendo todos esses objetos 'ShipData'.\n\n# DADOS DE ENTRADA\nVocê receberá um array JSON onde cada objeto representa um navio e contém um conjunto consolidado de informações de todos os stakeholders (Agência, Receita, ANVISA, Armador, Terminal, etc.).\n\n# REGRAS DE PROCESSAMENTO (LÓGICA DE NEGÓCIOS)\n\nPara cada objeto \"navio\" no array de entrada, você deve executar os seguintes passos para criar um objeto \"ShipData\":\n\n## 1. Mapeamento de Dados Básicos:\n- \\`id\\`: Use o valor do campo \\`identificadorNavio\\`.\n- \\`shipName\\`: Use o valor do campo \\`identificadorNavio\\`.\n- \\`shipType\\`: Use o valor do campo \\`tipoNavio\\`.\n\n## 2. Identificação de Pendências (Issues):\n- Defina a lista de status negativos: \\`[\"pendente\", \"atrasado\", \"cancelado\", \"bloqueado\", \"reprovado\", \"negado\", \"aguardando_autorizacao\", \"problema_fiscal\", \"incompleto\", \"pendente_manifesto\"]\\`.\n- Crie uma lista vazia chamada \\`issues\\`.\n- Verifique os seguintes campos de status no objeto do navio:\n    - \\`statusDocumentacao\\` (Órgão: \"Agencia Maritima\")\n    - \\`statusVerificacao\\` (Órgão: \"Receita Federal\")\n    - \\`statusSanitario\\` (Órgão: \"Anvisa\")\n    - \\`statusAutorizacao\\` (Órgão: \"Capitania dos Portos\")\n    - \\`statusOperacao\\` (Órgão: \"Terminal Portuário\")\n- Se o valor de um desses campos estiver na lista de status negativos, adicione um objeto à lista \\`issues\\` com:\n    - \\`authority\\`: O nome do órgão correspondente (ex: \"Receita Federal\").\n    - \\`reason\\`: O detalhe da pendência, extraído dos campos \\`pendencias\\`, \\`inconformidades\\`, \\`motivoIntercorrencia\\`, \\`observacoes\\`, ou do próprio status, caso os outros sejam nulos.\n\n## 3. Análise Preditiva de Atraso:\n- Inicie uma variável \\`predictedDelayHours\\` com 0.\n- Analise a lista \\`issues\\` que você acabou de criar:\n    - Se houver uma pendência com \\`authority\\` \"Receita Federal\", some **4 horas** ao \\`predictedDelayHours\\`.\n    - Se houver uma pendência com \\`authority\\` \"Anvisa\", some **2 horas** ao \\`predictedDelayHours\\`.\n    - Se houver uma pendência com \\`authority\\` \"Capitania dos Portos\", some **3 horas** ao \\`predictedDelayHours\\`.\n\n## 4. Definição do Status Geral (Nova Lógica):\n- **Verificar Emergência:** Verifique se o \\`identificadorNavio\\` ou qualquer campo de observação/motivo contém a palavra \"emergencia\" ou \"emergência\".\n    - Se sim, defina o \\`status\\` como \"emergency\" e o \\`statusLabel\\` como \"Emergência\".\n- **Verificar Erro Crítico:** Caso não seja uma emergência, verifique se algum dos status do navio (listados na regra 2) está na lista de bloqueio: \\`[\"cancelado\", \"bloqueado\", \"negado\", \"rejeitado\"]\\`.\n    - Se sim, defina o \\`status\\` como \"error\" e o \\`statusLabel\\` como \"Erro Crítico / Bloqueio\". Neste caso, o \\`predictedDelayHours\\` deve ser definido como \\`null\\`.\n- **Verificar Alerta/Risco:** Caso não seja emergência ou erro, verifique se a lista \\`issues\\` tem algum item.\n    - Se sim, defina o \\`status\\` como \"warning\" e o \\`statusLabel\\` como \"Atenção / Risco de Atraso\".\n- **Status Informativo:** Se nenhuma das condições acima for atendida (o navio está sem pendências), defina o \\`status\\` como \"info\" e o \\`statusLabel\\` como \"Operação Normal\".\n\n## 5. Geração de Recomendações (IA Generativa):\n- Com base nas pendências (\\`issues\\`) e no status geral, crie o objeto \\`recommendations\\`.\n- \\`summary\\`: Crie um resumo conciso da situação.\n    - Ex (se status for 'warning'): \"Previsão de atraso de [predictedDelayHours] horas devido a pendências com [lista de órgãos com problemas].\"\n    - Ex (se status for 'error'): \"Operação bloqueada. Ação imediata necessária junto à [órgão que bloqueou] para evitar cancelamento.\"\n    - Ex (se status for 'info'): \"Nenhuma pendência crítica identificada. Operação segue conforme o planejado.\"\n    - Ex (se status for 'emergency'): \"Navio em estado de emergência. Priorizar acesso e coordenar com autoridades para suporte imediato.\"\n- \\`actions\\`: Crie uma lista de ações claras e diretas para resolver cada pendência.\n    - Ex (para Receita Federal): \"Contatar despachante para retificar o manifesto de carga junto à Receita Federal.\"\n    - Ex (para Anvisa): \"Acionar a equipe de bordo para resolver a inconformidade sanitária e solicitar nova inspeção da ANVISA.\"\n    - Ex (se status for 'info'): \"Monitorar ETA e confirmar janela de atracação com o terminal.\"\n\n# FORMATO DA SAÍDA\nSua resposta final deve ser um array de objetos JSON, onde cada objeto segue rigorosamente a estrutura da interface 'ShipData' abaixo. Não inclua nenhum texto ou formatação fora do array JSON.\n\n\\`\\`\\`json\n[\n  {\n    \"id\": \"string\",\n    \"shipName\": \"string\",\n    \"shipType\": \"string\",\n    \"status\": \"error | warning | info | emergency\",\n    \"statusLabel\": \"string\",\n    \"issues\": [\n      {\n        \"authority\": \"string\",\n        \"reason\": \"string\"\n      }\n    ],\n    \"recommendations\": {\n      \"summary\": \"string\",\n      \"actions\": [\n        \"string\"\n      ]\n    }\n  }\n]\n\\`\\`\\`\n\n# TAREFA\nExecute as regras de processamento no JSON de entrada abaixo e gere o array de objetos 'ShipData' como saída.`;\n\nconst dataObject = items[0].json;\n\n\nconst dataString = JSON.stringify(dataObject, null, 2);\n\nconst finalObject = {\n  chatInput: ` \\n  ${BuinessPromptLogic} \\n ${dataString}`,\n};\n\nreturn finalObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        416
+      ],
+      "id": "cc21e07c-d374-48b3-bdeb-ff9edc62c1b0",
+      "name": "Lógica de Negócio Genérica para Pendências"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        416
+      ],
+      "id": "36c3cf39-1387-413d-b77c-bc24439c80b0",
+      "name": "GenericAI"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pega o item de entrada.\nconst inputItem = $input.first().json;\n\n// Etapa 1: Acessar a propriedade correta ('output') para obter a string bruta.\nconst rawOutputString = inputItem.output;\n\n/*\n  Etapa 2: Limpar a string.\n  - Remove o \"```json\\n\" do começo.\n  - Remove o \"\\n```\" do final.\n  - .trim() remove espaços em branco extras, por segurança.\n*/\nconst cleanedJsonString = rawOutputString\n  .replace(\"```json\\n\", \"\")\n  .replace(\"\\n```\", \"\")\n  .trim();\n\n// Etapa 3: Agora que a string está limpa, fazer o parse.\nconst reportDataObject = JSON.parse(cleanedJsonString);\n\n// Etapa 4: Retornar o objeto JavaScript pronto para ser usado.\n\nreturn {\n  data: reportDataObject\n};\nreturn reportDataObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        416
+      ],
+      "id": "dd0e0b61-84c5-415a-b9b2-b052867e9655",
+      "name": "CON2"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "60CIQoQafo5FMMSC",
+          "mode": "list",
+          "cachedResultName": "BuscaAPIs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        416
+      ],
+      "name": "Call BuscaAPIs1",
+      "id": "3b5cccd3-563d-4d36-a7f7-c0b6fdab0ef1"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "9f2461e9-ed47-4067-9bae-4f33066f8102",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -512,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  uuid: $input.first().json.data\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        112
+      ],
+      "id": "7b5b282e-a801-40a5-838a-ab551739a638",
+      "name": "UUID"
+    },
+    {
+      "parameters": {
+        "url": "https://www.uuidgenerator.net/api/version1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        224,
+        112
+      ],
+      "id": "5c974e31-8015-4fc8-b5a7-44bfbb0a7982",
+      "name": "UUID GERADOR"
+    },
+    {
+      "parameters": {
+        "claims": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.jwt",
+      "typeVersion": 1,
+      "position": [
+        512,
+        656
+      ],
+      "id": "d7105af9-289d-4521-a849-6654a5ed8449",
+      "name": "JWT",
+      "credentials": {
+        "jwtAuth": {
+          "id": "a7xldsNVHq1ixbzI",
+          "name": "JWT Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "numberInputs": 3,
+        "query": "SELECT * FROM input1 LEFT JOIN input2 ON input1.name = input2.id\nLEFT JOIN input3 ON input2.name = input3.id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        400
+      ],
+      "id": "fd291cd5-dec5-4a32-a0d4-9bfc3ca75c93",
+      "name": "ADCIONA UUID E JWT"
+    },
+    {
+      "parameters": {
+        "tableId": "report",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id",
+              "fieldValue": "={{ $json.uuid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        736,
+        64
+      ],
+      "id": "835b19b3-62ce-4747-b883-09511c9bb6b2",
+      "name": "C_REPORT",
+      "credentials": {
+        "supabaseApi": {
+          "id": "h72p2r0A8T6CTOHI",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Lógica de Negócio Genérica para Pendências": {
+      "main": [
+        [
+          {
+            "node": "GenericAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenericAI": {
+      "main": [
+        [
+          {
+            "node": "CON2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OAI M1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GenericAI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call BuscaAPIs1": {
+      "main": [
+        [
+          {
+            "node": "Lógica de Negócio Genérica para Pendências",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CON2": {
+      "main": [
+        [
+          {
+            "node": "ADCIONA UUID E JWT",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Call BuscaAPIs1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "UUID GERADOR",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "JWT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UUID GERADOR": {
+      "main": [
+        [
+          {
+            "node": "UUID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UUID": {
+      "main": [
+        [
+          {
+            "node": "ADCIONA UUID E JWT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "C_REPORT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JWT": {
+      "main": [
+        [
+          {
+            "node": "ADCIONA UUID E JWT",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c1a7c714-6689-4e89-a650-4830b6f320df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
+  },
+  "id": "PSuWTcou8nac0OlG",
+  "tags": []
+}

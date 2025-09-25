@@ -1,0 +1,543 @@
+{
+  "name": "CascadeSightAIv2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        -560
+      ],
+      "id": "fa8b7857-7944-4811-9c84-a1d241e639dd",
+      "name": "postChatsend",
+      "webhookId": "4e3e6580-8a7a-46fc-a11a-d95b46607967"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body[0].sessionId, body[0].chatInput",
+        "options": {
+          "disableDotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -656
+      ],
+      "id": "3c734205-d0b2-4ee5-98a7-58e4dcc12ae9",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        -560
+      ],
+      "id": "a1dc690c-7035-4662-a75d-1532f106f586",
+      "name": "MesclarPost"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  sessiondId: $input.first().json[\"body[0].sessionId\"],\n  chatInput: $input.first().json[\"body[0].chatInput\"]\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -656
+      ],
+      "id": "9c6dfa33-4415-4d75-9f89-b059867ef6a5",
+      "name": "formatarPost"
+    },
+    {
+      "parameters": {
+        "jsCode": "return {\n  sessionId: $input.first().json.sessiondId,\n  chatInput: $input.first().json.negocio + \"RESPOSTA DO USUÁRIO:\" + $input.first().json.chatInput\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -560
+      ],
+      "id": "b46a3c25-08be-405b-b540-cb53ef8b68e4",
+      "name": "Formatar"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        -560
+      ],
+      "id": "aeb7d2c7-a6e6-4312-a69d-a4bd75d2b4f4",
+      "name": "OpenShipAI"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        -336
+      ],
+      "id": "8883c271-b2a7-4461-b412-34acfcfc32d1",
+      "name": "OAI M2",
+      "credentials": {
+        "openAiApi": {
+          "id": "6SDWRvzc9sQJQ48l",
+          "name": "OpenAi account 36"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pega o item de entrada.\nconst inputItem = $input.first().json;\n\n// Etapa 1: Acessar a propriedade correta ('output') para obter a string bruta.\nconst rawOutputString = inputItem.output;\n\n/*\n  Etapa 2: Limpar a string.\n  - Remove o \"```json\\n\" do começo.\n  - Remove o \"\\n```\" do final.\n  - .trim() remove espaços em branco extras, por segurança.\n*/\nconst cleanedJsonString = rawOutputString\n  .replace(\"```json\\n\", \"\")\n  .replace(\"\\n```\", \"\")\n  .trim();\n\n// Etapa 3: Agora que a string está limpa, fazer o parse.\nconst reportDataObject = JSON.parse(cleanedJsonString);\n\n// Etapa 4: Retornar o objeto JavaScript pronto para ser usado.\nreturn reportDataObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        -560
+      ],
+      "id": "35cf1e25-7076-4de8-9c79-9f68aaeedabe",
+      "name": "CON1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        -336
+      ],
+      "id": "a617f57b-1634-4517-af55-3a8b6dfe7e5a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1424,
+        -560
+      ],
+      "id": "55f3490c-944b-4473-982f-99ec33986b7f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "60CIQoQafo5FMMSC",
+          "mode": "list",
+          "cachedResultName": "BuscaAPIs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        -464
+      ],
+      "name": "Call BuscaAPIs",
+      "id": "aaa6eeba-e330-4cf8-ba46-2a021ee37d5d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n// O glossário é definido aqui para ser injetado no prompt.\nconst Glossario = {\n  \"glossarioPortuario\": {\n    \"Agência Marítima\": \"Representa o navio no porto, intermedia atracação e contato com órgãos públicos.\",\n    \"ANVISA\": \"Agência Nacional de Vigilância Sanitária. Fiscaliza saúde da tripulação e cargas.\",\n    \"Armador\": \"Empresa proprietária do navio.\",\n    \"Atracação\": \"Ato de encostar o navio ao cais para operações.\",\n    \"Autoridade Portuária\": \"Entidade que administra a infraestrutura do porto (ex: APS em Santos).\",\n    \"Avaria Grossa\": \"Ato de dividir prejuízos de um incidente entre todos os envolvidos no transporte.\",\n    \"Backlog\": \"Acúmulo de cargas ou operações em atraso.\",\n    \"Berço de Atracação\": \"Local físico designado para atracação do navio.\",\n    \"Bill of Lading (BL)\": \"Documento que comprova a posse e contrato de transporte da carga.\",\n    \"Canal de Acesso\": \"Trecho navegável que liga o mar ao cais do porto.\",\n    \"Carga Conteinerizada\": \"Mercadorias transportadas em contêineres.\",\n    \"Carga Geral\": \"Mercadorias embaladas ou unitizadas, como peças e caixas.\",\n    \"Carga Granel Líquido\": \"Carga líquida a granel, como petróleo, sucos e combustíveis.\",\n    \"Carga Granel Sólido\": \"Produtos sólidos a granel como soja, milho, fertilizantes.\",\n    \"Carga Perigosa (IMO)\": \"Cargas que apresentam risco à saúde ou ao meio ambiente.\",\n    \"Cargas Projeto\": \"Cargas de grande porte ou peso, como turbinas ou transformadores.\",\n    \"Cais\": \"Estrutura onde os navios atracam.\",\n    \"Concessionária Portuária\": \"Empresa que administra uma área do porto mediante concessão.\",\n    \"Container Depot\": \"Local onde são armazenados e mantidos contêineres vazios.\",\n    \"Contêiner\": \"Unidade padronizada para transporte de cargas.\",\n    \"Cubagem\": \"Cálculo de volume da carga em metros cúbicos.\",\n    \"Cut-off\": \"Prazo-limite para entrega da carga ao terminal antes do embarque.\",\n    \"Demurrage (Navio)\": \"Multa paga ao armador por uso extra do navio além do tempo acordado.\",\n    \"Demurrage (Contêiner)\": \"Multa paga por atraso na devolução do contêiner.\",\n    \"Despacho Aduaneiro\": \"Processo de liberação de mercadoria pela Receita Federal.\",\n    \"ETA\": \"Estimated Time of Arrival – previsão de chegada ao porto.\",\n    \"ETB\": \"Estimated Time of Berthing – previsão de atracação.\",\n    \"ETD\": \"Estimated Time of Departure – previsão de saída do porto.\",\n    \"Estufagem\": \"Ato de carregar carga dentro de um contêiner.\",\n    \"Free Time\": \"Período gratuito para uso de equipamento ou infraestrutura antes de cobranças.\",\n    \"Gate In\": \"Entrada da carga ou contêiner no terminal.\",\n    \"Gate Out\": \"Saída da carga ou contêiner no terminal.\",\n    \"ISPS Code\": \"Código internacional de segurança portuária.\",\n    \"Janela de Atracação\": \"Horário reservado para atracação, evitando conflitos entre navios.\",\n    \"Linha de Atracação\": \"Cabos utilizados para fixar o navio ao cais.\",\n    \"Manifesto de Carga\": \"Lista de todas as cargas a bordo do navio.\",\n    \"MAPA (Vigiagro)\": \"Fiscaliza cargas agropecuárias de importação/exportação.\",\n    \"Manobra Portuária\": \"Conjunto de ações para movimentar o navio com segurança no porto.\",\n    \"Navio Feeder\": \"Navio menor que faz conexão entre portos regionais e grandes portos.\",\n    \"NVOCC\": \"Operador que atua como transportador sem possuir navios (frequentemente em contêineres).\",\n    \"Operador Portuário\": \"Empresa que executa a operação de carga e descarga.\",\n    \"Plataforma PSP\": \"Antiga plataforma digital chamada Porto Sem Papel.\",\n    \"Prancha\": \"Período de operação portuária de um navio.\",\n    \"Prático\": \"Profissional que guia o navio nas águas do canal até o cais.\",\n    \"Pull in / Pull out\": \"Movimentos de entrada e saída de navios no berço.\",\n    \"Receita Federal\": \"Órgão responsável pela fiscalização e liberação aduaneira.\",\n    \"Redex\": \"Recinto Especial para Despacho Aduaneiro de Exportação.\",\n    \"Rebocador\": \"Embarcação auxiliar que ajuda nas manobras de atracação/desatracação.\",\n    \"Siscomex\": \"Sistema Integrado de Comércio Exterior.\",\n    \"Tancagem\": \"Área para armazenamento de líquidos graneis, como combustíveis.\",\n    \"Terminal Alfandegado\": \"Local sob controle da Receita onde as cargas aguardam liberação.\",\n    \"Turnaround\": \"Tempo total de permanência do navio no porto, da chegada à saída.\",\n    \"Vessel Schedule\": \"Programação de chegada e saída dos navios.\",\n    \"Vessel Tracking\": \"Rastreamento da posição de navios em tempo real.\"\n  }\n};\n\n// Dados que viriam do seu fluxo de processamento anterior\nconst shipData = items[0].json; \n\n// A pergunta do usuário (em um cenário real, viria do front-end)\nconst userQuestion = \"Qual a situação do navio MSC-DELAY-006?\"; \n\nconst glossarioString = JSON.stringify(Glossario, null, 2);\nconst shipDataString = JSON.stringify(shipData, null, 2);\n\nconst BuinessPromptLogic = `# PERSONA\nVocê é 'PortIA', um assistente de IA especializado em operações do Porto de Santos. Sua comunicação é profissional, precisa e direta.\n\n# BASE DE CONHECIMENTO (ESCOPO RESTRITO)\nSua inteligência é baseada **EXCLUSIVAMENTE** nos dois documentos JSON a seguir. É proibido usar conhecimento externo ou inventar informações.\n\n1.  **STATUS OPERACIONAL DOS NAVIOS (DADOS DINÂMICOS):**\n    ${shipDataString}\n\n2.  **GLOSSÁRIO TÉCNICO (DADOS ESTÁTICOS):**\n    ${glossarioString}\n\n# OBJETIVO\nSua missão é analisar a pergunta do usuário, encontrar a resposta dentro da sua BASE DE CONHECIMENTO e retornar um **ÚNICO OBJETO JSON** como resposta, seguindo o formato de saída especificado.\n\n# LÓGICA DE RESPOSTA\n1.  **Analisar a Intenção do Usuário:** Classifique a pergunta em uma das seguintes categorias:\n    - \\`get_general_summary\\`: Se o usuário pede um resumo geral da situação do porto.\n    - \\`get_ship_details\\`: Se o usuário pergunta sobre um navio específico, identificado pelo seu 'id'.\n    - \\`define_term\\`: Se o usuário pede a definição de um termo técnico.\n    - \\`fallback\\`: Se a pergunta não se encaixa em nenhuma das anteriores ou a informação não pode ser encontrada.\n\n2.  **Executar a Ação e Formular a Resposta:**\n    - **Para \\`get_general_summary\\`:** Conte o número de navios em cada categoria de status ('info', 'warning', 'error', 'emergency'). Crie uma frase de resumo para o campo \\`displayText\\`.\n    - **Para \\`get_ship_details\\`:**\n        - Extraia o 'id' do navio da pergunta.\n        - Encontre o objeto correspondente no JSON de status operacional.\n        - Se encontrar, formule uma resposta detalhada para \\`displayText\\` e popule o campo \\`data\\` com o objeto completo do navio.\n        - Se não encontrar, trate como \\`fallback\\`.\n    - **Para \\`define_term\\`:**\n        - Extraia o termo da pergunta.\n        - Busque o termo no glossário.\n        - Se encontrar, coloque a definição no campo \\`displayText\\`.\n        - Se não encontrar, trate como \\`fallback\\`.\n    - **Para \\`fallback\\`:** Crie uma mensagem informando que você não possui a informação e liste suas capacidades.\n\n# FORMATO DA SAÍDA (JSON ÚNICO OBRIGATÓRIO)\nSua resposta deve ser um único objeto JSON com a seguinte estrutura:\n\n\\`\\`\\`json\n{\n  \"responseType\": \"answer | fallback\",\n  \"displayText\": \"A resposta em texto para ser exibida ao usuário.\",\n  \"data\": {\n    // Se a pergunta for sobre um navio específico, este campo contém o objeto completo do navio. Caso contrário, é null.\n  }\n}\n\\`\\`\\`\n\n# TAREFA\nResponda à pergunta do usuário abaixo, seguindo todas as regras e gerando o objeto JSON de saída.`;\n\n\nconst finalObject = {\n  negocio: BuinessPromptLogic,\n};\n\nreturn finalObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -464
+      ],
+      "id": "dd3a2f5f-db12-473a-ae53-667301e11ef5",
+      "name": "OpenShipIA Logica"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PSuWTcou8nac0OlG",
+          "mode": "list",
+          "cachedResultName": "StackholderGenerico"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -272,
+        96
+      ],
+      "name": "StackeholderGenerico",
+      "id": "c2b08c23-9d73-4fdd-8a53-face95881271"
+    },
+    {
+      "parameters": {
+        "jsCode": "// =================================================================\n// CONFIGURAÇÕES E VARIÁVEIS GLOBAIS\n// =================================================================\n\nconst uuid = $input.first().json.uuid; \nconst token = $input.first().json.token; \nconst siteUrl = `https://www.seusite.com.br/verificar?uuid=${uuid}&token=${token}`;\n\nconst colors = {\n    background: '#f4f7f9',\n    cardBackground: '#ffffff',\n    textPrimary: '#333333',\n    textSecondary: '#666666',\n    border: '#dddddd',\n    \n    // Gradiente para o cabeçalho\n    headerGradient: 'linear-gradient(160deg, #4D22E9, #E65AAE)',\n    headerText: '#ffffff', \n\n    successBackground: '#dff0d8',\n    successBorder: '#3c763d',\n    successText: '#3c763d',\n    \n    warningBackground: '#fff3e0',\n    warningBorder: '#ff9800',\n    warningText: '#e65100',\n    \n    emergencyBackground: '#ffebee',\n    emergencyBorder: '#c62828',\n    emergencyText: '#c62828',\n\n    buttonBackground: '#1976d2',\n    buttonText: '#ffffff'\n};\n\n\n// =================================================================\n// FUNÇÃO AUXILIAR PARA GERAR OS CARDS DOS NAVIOS\n// =================================================================\n\nfunction gerarHtmlCardsNavios(naviosArray) {\n    if (!naviosArray || naviosArray.length === 0) {\n        return `<tr><td style=\"padding-bottom: 20px;\"><p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhum navio encontrado nos dados fornecidos.</p></td></tr>`;\n    }\n\n    const cardsHtml = naviosArray.map(navio => {\n        let config;\n        switch (navio.status) {\n            case 'info':\n                config = { bgColor: colors.successBackground, borderColor: colors.successBorder, textColor: colors.successText };\n                break;\n            case 'warning':\n                config = { bgColor: colors.warningBackground, borderColor: colors.warningBorder, textColor: colors.warningText };\n                break;\n            case 'emergency':\n            case 'error':\n                config = { bgColor: colors.emergencyBackground, borderColor: colors.emergencyBorder, textColor: colors.emergencyText };\n                break;\n            default:\n                config = { bgColor: '#f0f0f0', borderColor: '#ccc', textColor: '#333' };\n        }\n\n        const issuesContent = (navio.issues && navio.issues.length > 0) ?\n            `\n            <h3 style=\"margin-top: 0; margin-bottom: 10px; font-size: 16px; color: ${colors.textPrimary};\">Pendências Identificadas</h3>\n            <ul style=\"margin: 0; padding-left: 20px; color: ${colors.textSecondary}; font-size: 14px;\">\n                ${navio.issues.map(issue => `\n                    <li style=\"margin-bottom: 8px; line-height: 1.5;\">\n                        <strong style=\"color: ${colors.textPrimary};\">${issue.authority}:</strong> ${issue.reason}\n                    </li>\n                `).join('')}\n            </ul>\n            ` :\n            `<p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhuma pendência identificada.</p>`;\n\n        return `\n            <tr>\n                <td style=\"padding-bottom: 20px;\">\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse; border: 1px solid ${config.borderColor}; border-radius: 8px; background-color: ${colors.cardBackground}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n                        <tr>\n                            <td style=\"padding: 15px 20px; background-color: ${config.bgColor}; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 1px solid ${config.borderColor};\">\n                                <h2 style=\"margin: 0; font-size: 18px; color: ${config.textColor};\">\n                                    ${navio.shipName} - <span style=\"text-transform: uppercase;\">${navio.statusLabel}</span>\n                                </h2>\n                            </td>\n                        </tr>\n                        <tr>\n                            <td style=\"padding: 20px;\">\n                                ${issuesContent}\n                            </td>\n                        </tr>\n                    </table>\n                </td>\n            </tr>\n        `;\n    }).join('');\n\n    return cardsHtml;\n}\n\n\n// =================================================================\n// LÓGICA PRINCIPAL DO NÓ\n// =================================================================\n\nconst naviosComAlerta = $input.first().json.data;\n\n// Define a prioridade de cada status\nconst statusPriority = {\n    'emergency': 1,\n    'error': 2,\n    'warning': 3,\n    'info': 4,\n};\n\n// Ordena o array 'naviosComAlerta'\nnaviosComAlerta.sort((a, b) => {\n    const priorityA = statusPriority[a.status] || 99;\n    const priorityB = statusPriority[b.status] || 99;\n    return priorityA - priorityB;\n});\n\n// Gera o HTML dinâmico dos cards com a lista já ordenada\nconst cardsNaviosHtml = gerarHtmlCardsNavios(naviosComAlerta);\n\n// Monta o documento HTML final do email\nconst finalHtml = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Alerta de Status Operacional</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: ${colors.background}; font-family: Arial, Helvetica, sans-serif;\">\n    <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n        <tr>\n            <td align=\"center\" style=\"padding: 20px 0;\">\n                <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"border-collapse: collapse; background-color: ${colors.cardBackground}; border: 1px solid ${colors.border};\">\n                    <tr>\n                        <td align=\"center\" style=\"padding: 30px 20px; background: ${colors.headerGradient}; color: ${colors.headerText};\">\n                            <h1 style=\"margin: 0; font-size: 24px; font-weight: bold;\">Alerta de Status Operacional</h1>\n                            <p style=\"margin: 5px 0 0; font-size: 14px;\">Atualizações sobre as operações portuárias em ${new Date().toLocaleDateString('pt-BR')}.</p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 30px 25px 10px 25px;\">\n                            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n                                ${cardsNaviosHtml}\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px 30px 40px 30px;\">\n                            <a href=\"${siteUrl}\" target=\"_blank\" style=\"display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: ${colors.buttonText}; background-color: ${colors.buttonBackground}; text-decoration: none; border-radius: 5px;\">\n                                Ver Detalhes na Plataforma\n                            </a>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px; background-color: #eeeeee; color: #888888; font-size: 12px;\">\n                            <p style=\"margin: 0;\">Este é um relatório automático. Não responda a este email.</p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>`;\n\n// Retorna o HTML completo para ser usado no próximo nó (ex: Send Email)\nreturn {\n    json: {\n        html: finalHtml\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "14c85171-75fa-4c9a-a6ea-fa2b7a5ec0d1",
+      "name": "Conversão para o HTML"
+    },
+    {
+      "parameters": {
+        "sendTo": "=alisson.r.santos92@gmail.com,ronald.evangelista@aluno.ifsp.edu.br\n",
+        "subject": "=Alerta de Status Operacional",
+        "message": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        -16
+      ],
+      "id": "ea5a2118-7e8b-4563-b4e2-363a9f41f39e",
+      "name": "Envio do Email",
+      "webhookId": "a3ac24d8-7f4a-440d-b212-3881cacf3fd6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Qm3UsXyf28rv7x8E",
+          "name": "Gmail account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "zqm34Kauyaaixnvp",
+          "mode": "list",
+          "cachedResultName": "StackholderGenericoDashboard"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "uuid": "={{ $json.uuid }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "uuid",
+              "displayName": "uuid",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        192
+      ],
+      "id": "2acfe17f-7b9b-4d72-ba02-1ecb8fab0396",
+      "name": "Call 'StackholderGenericoDashboard'"
+    },
+    {
+      "parameters": {
+        "path": "dashboard",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -272,
+        -240
+      ],
+      "id": "fe18f43d-35a7-466b-b650-a88ae1e3e22b",
+      "name": "getDashboard",
+      "webhookId": "240e5d3c-d6b3-4b40-bb3c-237d324b0d19",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "report_info",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "report_id",
+              "keyValue": "={{ $json.query.uuid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -240
+      ],
+      "id": "00d24bc4-d09b-47ed-866d-5d23541ca5b2",
+      "name": "CONSULTA BANCO",
+      "credentials": {
+        "supabaseApi": {
+          "id": "h72p2r0A8T6CTOHI",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        176,
+        -240
+      ],
+      "id": "6d13dee8-397a-4db4-8eae-603725497e0e",
+      "name": "responseDashboard"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "postChatsend": {
+      "main": [
+        [
+          {
+            "node": "Call BuscaAPIs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "formatarPost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MesclarPost": {
+      "main": [
+        [
+          {
+            "node": "Formatar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatarPost": {
+      "main": [
+        [
+          {
+            "node": "MesclarPost",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatar": {
+      "main": [
+        [
+          {
+            "node": "OpenShipAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenShipAI": {
+      "main": [
+        [
+          {
+            "node": "CON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OAI M2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "OpenShipAI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "OpenShipAI",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CON1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call BuscaAPIs": {
+      "main": [
+        [
+          {
+            "node": "OpenShipIA Logica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenShipIA Logica": {
+      "main": [
+        [
+          {
+            "node": "MesclarPost",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Conversão para o HTML": {
+      "main": [
+        [
+          {
+            "node": "Envio do Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StackeholderGenerico": {
+      "main": [
+        [
+          {
+            "node": "Conversão para o HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Call 'StackholderGenericoDashboard'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getDashboard": {
+      "main": [
+        [
+          {
+            "node": "CONSULTA BANCO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CONSULTA BANCO": {
+      "main": [
+        [
+          {
+            "node": "responseDashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3ab435aa-1deb-4c03-a6d7-24afab7b180e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
+  },
+  "id": "uDEsaDBeaReaJJE4",
+  "tags": []
+}

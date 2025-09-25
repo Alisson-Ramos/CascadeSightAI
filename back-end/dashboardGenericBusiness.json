@@ -1,0 +1,256 @@
+{
+  "name": "StackholderGenericoDashboard",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        816
+      ],
+      "id": "fe819917-d1a6-4530-a6da-1c79ef4ae5a6",
+      "name": "OAI M",
+      "credentials": {
+        "openAiApi": {
+          "id": "6SDWRvzc9sQJQ48l",
+          "name": "OpenAi account 36"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n// O glossário é definido aqui para ser injetado no prompt.\nconst Glossario = {\n  \"glossarioPortuario\": {\n    \"Agência Marítima\": \"Representa o navio no porto, intermedia atracação e contato com órgãos públicos.\",\n    \"ANVISA\": \"Agência Nacional de Vigilância Sanitária. Fiscaliza saúde da tripulação e cargas.\",\n    \"Armador\": \"Empresa proprietária do navio.\",\n    \"Atracação\": \"Ato de encostar o navio ao cais para operações.\",\n    \"Autoridade Portuária\": \"Entidade que administra a infraestrutura do porto (ex: APS em Santos).\",\n    \"Avaria Grossa\": \"Ato de dividir prejuízos de um incidente entre todos os envolvidos no transporte.\",\n    \"Backlog\": \"Acúmulo de cargas ou operações em atraso.\",\n    \"Berço de Atracação\": \"Local físico designado para atracação do navio.\",\n    \"Bill of Lading (BL)\": \"Documento que comprova a posse e contrato de transporte da carga.\",\n    \"Canal de Acesso\": \"Trecho navegável que liga o mar ao cais do porto.\",\n    \"Carga Conteinerizada\": \"Mercadorias transportadas em contêineres.\",\n    \"Carga Geral\": \"Mercadorias embaladas ou unitizadas, como peças e caixas.\",\n    \"Carga Granel Líquido\": \"Carga líquida a granel, como petróleo, sucos e combustíveis.\",\n    \"Carga Granel Sólido\": \"Produtos sólidos a granel como soja, milho, fertilizantes.\",\n    \"Carga Perigosa (IMO)\": \"Cargas que apresentam risco à saúde ou ao meio ambiente.\",\n    \"Cargas Projeto\": \"Cargas de grande porte ou peso, como turbinas ou transformadores.\",\n    \"Cais\": \"Estrutura onde os navios atracam.\",\n    \"Concessionária Portuária\": \"Empresa que administra uma área do porto mediante concessão.\",\n    \"Container Depot\": \"Local onde são armazenados e mantidos contêineres vazios.\",\n    \"Contêiner\": \"Unidade padronizada para transporte de cargas.\",\n    \"Cubagem\": \"Cálculo de volume da carga em metros cúbicos.\",\n    \"Cut-off\": \"Prazo-limite para entrega da carga ao terminal antes do embarque.\",\n    \"Demurrage (Navio)\": \"Multa paga ao armador por uso extra do navio além do tempo acordado.\",\n    \"Demurrage (Contêiner)\": \"Multa paga por atraso na devolução do contêiner.\",\n    \"Despacho Aduaneiro\": \"Processo de liberação de mercadoria pela Receita Federal.\",\n    \"ETA\": \"Estimated Time of Arrival – previsão de chegada ao porto.\",\n    \"ETB\": \"Estimated Time of Berthing – previsão de atracação.\",\n    \"ETD\": \"Estimated Time of Departure – previsão de saída do porto.\",\n    \"Estufagem\": \"Ato de carregar carga dentro de um contêiner.\",\n    \"Free Time\": \"Período gratuito para uso de equipamento ou infraestrutura antes de cobranças.\",\n    \"Gate In\": \"Entrada da carga ou contêiner no terminal.\",\n    \"Gate Out\": \"Saída da carga ou contêiner no terminal.\",\n    \"ISPS Code\": \"Código internacional de segurança portuária.\",\n    \"Janela de Atracação\": \"Horário reservado para atracação, evitando conflitos entre navios.\",\n    \"Linha de Atracação\": \"Cabos utilizados para fixar o navio ao cais.\",\n    \"Manifesto de Carga\": \"Lista de todas as cargas a bordo do navio.\",\n    \"MAPA (Vigiagro)\": \"Fiscaliza cargas agropecuárias de importação/exportação.\",\n    \"Manobra Portuária\": \"Conjunto de ações para movimentar o navio com segurança no porto.\",\n    \"Navio Feeder\": \"Navio menor que faz conexão entre portos regionais e grandes portos.\",\n    \"NVOCC\": \"Operador que atua como transportador sem possuir navios (frequentemente em contêineres).\",\n    \"Operador Portuário\": \"Empresa que executa a operação de carga e descarga.\",\n    \"Plataforma PSP\": \"Antiga plataforma digital chamada Porto Sem Papel.\",\n    \"Prancha\": \"Período de operação portuária de um navio.\",\n    \"Prático\": \"Profissional que guia o navio nas águas do canal até o cais.\",\n    \"Pull in / Pull out\": \"Movimentos de entrada e saída de navios no berço.\",\n    \"Receita Federal\": \"Órgão responsável pela fiscalização e liberação aduaneira.\",\n    \"Redex\": \"Recinto Especial para Despacho Aduaneiro de Exportação.\",\n    \"Rebocador\": \"Embarcação auxiliar que ajuda nas manobras de atracação/desatracação.\",\n    \"Siscomex\": \"Sistema Integrado de Comércio Exterior.\",\n    \"Tancagem\": \"Área para armazenamento de líquidos graneis, como combustíveis.\",\n    \"Terminal Alfandegado\": \"Local sob controle da Receita onde as cargas aguardam liberação.\",\n    \"Turnaround\": \"Tempo total de permanência do navio no porto, da chegada à saída.\",\n    \"Vessel Schedule\": \"Programação de chegada e saída dos navios.\",\n    \"Vessel Tracking\": \"Rastreamento da posição de navios em tempo real.\"\n  }\n};\n\nconst glossarioString = JSON.stringify(Glossario, null, 2);\n\nconst BuinessPromptLogic = `# PERSONA\nVocê é um especialista em logística portuária e um analista de dados sênior. Sua função é analisar um conjunto de dados brutos sobre navios e transformá-lo em um array de objetos JSON estruturados e inteligentes. Sua análise deve ser precisa, baseada estritamente nos dados de entrada, e suas recomendações devem ser acionáveis.\n\n# CONTEXTO (GLOSSÁRIO)\nUse o glossário a seguir para entender os termos técnicos encontrados nos dados e para formular suas recomendações com a terminologia correta.\n${glossarioString}\n\n# OBJETIVO\nSua missão é processar o array de navios do JSON de entrada e, para cada navio, gerar um objeto JSON correspondente à interface 'ShipData'. O resultado final deve ser um array contendo todos esses objetos 'ShipData'.\n\n# DADOS DE ENTRADA\nVocê receberá um array JSON onde cada objeto representa um navio e contém um conjunto consolidado de informações de todos os stakeholders (Agência, Receita, ANVISA, Armador, Terminal, etc.).\n\n# REGRAS DE PROCESSAMENTO (LÓGICA DE NEGÓCIOS)\n\nPara cada objeto \"navio\" no array de entrada, você deve executar os seguintes passos para criar um objeto \"ShipData\":\n\n## 1. Mapeamento de Dados Básicos:\n- \\`id\\`: Use o valor do campo \\`identificadorNavio\\`.\n- \\`shipName\\`: Use o valor do campo \\`identificadorNavio\\`.\n- \\`shipType\\`: Use o valor do campo \\`tipoNavio\\`.\n\n## 2. Identificação de Pendências (Issues):\n- Defina a lista de status negativos: \\`[\"pendente\", \"atrasado\", \"cancelado\", \"bloqueado\", \"reprovado\", \"negado\", \"aguardando_autorizacao\", \"problema_fiscal\", \"incompleto\", \"pendente_manifesto\"]\\`.\n- Crie uma lista vazia chamada \\`issues\\`.\n- Verifique os seguintes campos de status no objeto do navio:\n    - \\`statusDocumentacao\\` (Órgão: \"Agencia Maritima\")\n    - \\`statusVerificacao\\` (Órgão: \"Receita Federal\")\n    - \\`statusSanitario\\` (Órgão: \"Anvisa\")\n    - \\`statusAutorizacao\\` (Órgão: \"Capitania dos Portos\")\n    - \\`statusOperacao\\` (Órgão: \"Terminal Portuário\")\n- Se o valor de um desses campos estiver na lista de status negativos, adicione um objeto à lista \\`issues\\` com:\n    - \\`authority\\`: O nome do órgão correspondente (ex: \"Receita Federal\").\n    - \\`reason\\`: O detalhe da pendência, extraído dos campos \\`pendencias\\`, \\`inconformidades\\`, \\`motivoIntercorrencia\\`, \\`observacoes\\`, ou do próprio status, caso os outros sejam nulos.\n\n## 3. Análise Preditiva de Atraso:\n- Inicie uma variável \\`predictedDelayHours\\` com 0.\n- Analise a lista \\`issues\\` que você acabou de criar:\n    - Se houver uma pendência com \\`authority\\` \"Receita Federal\", some **4 horas** ao \\`predictedDelayHours\\`.\n    - Se houver uma pendência com \\`authority\\` \"Anvisa\", some **2 horas** ao \\`predictedDelayHours\\`.\n    - Se houver uma pendência com \\`authority\\` \"Capitania dos Portos\", some **3 horas** ao \\`predictedDelayHours\\`.\n\n## 4. Definição do Status Geral (Nova Lógica):\n- **Verificar Emergência:** Verifique se o \\`identificadorNavio\\` ou qualquer campo de observação/motivo contém a palavra \"emergencia\" ou \"emergência\".\n    - Se sim, defina o \\`status\\` como \"emergency\" e o \\`statusLabel\\` como \"Emergência\".\n- **Verificar Erro Crítico:** Caso não seja uma emergência, verifique se algum dos status do navio (listados na regra 2) está na lista de bloqueio: \\`[\"cancelado\", \"bloqueado\", \"negado\", \"rejeitado\"]\\`.\n    - Se sim, defina o \\`status\\` como \"error\" e o \\`statusLabel\\` como \"Erro Crítico / Bloqueio\". Neste caso, o \\`predictedDelayHours\\` deve ser definido como \\`null\\`.\n- **Verificar Alerta/Risco:** Caso não seja emergência ou erro, verifique se a lista \\`issues\\` tem algum item.\n    - Se sim, defina o \\`status\\` como \"warning\" e o \\`statusLabel\\` como \"Atenção / Risco de Atraso\".\n- **Status Informativo:** Se nenhuma das condições acima for atendida (o navio está sem pendências), defina o \\`status\\` como \"info\" e o \\`statusLabel\\` como \"Operação Normal\".\n\n## 5. Geração de Recomendações (IA Generativa):\n- Com base nas pendências (\\`issues\\`) e no status geral, crie o objeto \\`recommendations\\`.\n- \\`summary\\`: Crie um resumo conciso da situação.\n    - Ex (se status for 'warning'): \"Previsão de atraso de [predictedDelayHours] horas devido a pendências com [lista de órgãos com problemas].\"\n    - Ex (se status for 'error'): \"Operação bloqueada. Ação imediata necessária junto à [órgão que bloqueou] para evitar cancelamento.\"\n    - Ex (se status for 'info'): \"Nenhuma pendência crítica identificada. Operação segue conforme o planejado.\"\n    - Ex (se status for 'emergency'): \"Navio em estado de emergência. Priorizar acesso e coordenar com autoridades para suporte imediato.\"\n- \\`actions\\`: Crie uma lista de ações claras e diretas para resolver cada pendência.\n    - Ex (para Receita Federal): \"Contatar despachante para retificar o manifesto de carga junto à Receita Federal.\"\n    - Ex (para Anvisa): \"Acionar a equipe de bordo para resolver a inconformidade sanitária e solicitar nova inspeção da ANVISA.\"\n    - Ex (se status for 'info'): \"Monitorar ETA e confirmar janela de atracação com o terminal.\"\n\n# FORMATO DA SAÍDA\nSua resposta final deve ser um array de objetos JSON, onde cada objeto segue rigorosamente a estrutura da interface 'ShipData' abaixo. Não inclua nenhum texto ou formatação fora do array JSON.\n\n\\`\\`\\`json\n[\n  {\n    \"id\": \"string\",\n    \"shipName\": \"string\",\n    \"shipType\": \"string\",\n    \"status\": \"error | warning | info | emergency\",\n    \"statusLabel\": \"string\",\n    \"issues\": [\n      {\n        \"authority\": \"string\",\n        \"reason\": \"string\"\n      }\n    ],\n    \"recommendations\": {\n      \"summary\": \"string\",\n      \"actions\": [\n        \"string\"\n      ]\n    }\n  }\n]\n\\`\\`\\`\n\n# TAREFA\nExecute as regras de processamento no JSON de entrada abaixo e gere o array de objetos 'ShipData' como saída.`;\n\nconst dataObject = items[0].json;\n\n\nconst dataString = JSON.stringify(dataObject, null, 2);\n\nconst finalObject = {\n  chatInput: ` \\n  ${BuinessPromptLogic} \\n ${dataString}`,\n};\n\nreturn finalObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        592
+      ],
+      "id": "e9b2da3e-ec2f-4042-b0a7-7295fd489401",
+      "name": "Lógica de Negócio Genérica para Pendências1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        592
+      ],
+      "id": "a9daaf8a-6b6f-4ada-8b16-06098e7e0554",
+      "name": "GenericAI1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pega o item de entrada.\nconst inputItem = $input.first().json;\n\n// Etapa 1: Acessar a propriedade correta ('output') para obter a string bruta.\nconst rawOutputString = inputItem.output;\n\n/*\n  Etapa 2: Limpar a string.\n  - Remove o \"```json\\n\" do começo.\n  - Remove o \"\\n```\" do final.\n  - .trim() remove espaços em branco extras, por segurança.\n*/\nconst cleanedJsonString = rawOutputString\n  .replace(\"```json\\n\", \"\")\n  .replace(\"\\n```\", \"\")\n  .trim();\n\n// Etapa 3: Agora que a string está limpa, fazer o parse.\nconst reportDataObject = JSON.parse(cleanedJsonString);\n\n// Etapa 4: Retornar o objeto JavaScript pronto para ser usado.\n\nreturn {\n  data: reportDataObject\n};\nreturn reportDataObject;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        592
+      ],
+      "id": "568f5d04-3729-4a0c-aa71-d973366e4947",
+      "name": "CON"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "60CIQoQafo5FMMSC",
+          "mode": "list",
+          "cachedResultName": "BuscaAPIs"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        592
+      ],
+      "name": "Call BuscaAPIs",
+      "id": "a7223ec7-8ad2-4228-a03a-83233db3145a"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "uuid"
+            }
+          ]
+        }
+      },
+      "id": "af52bf16-9066-40d7-aae0-164c3d23b259",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        240,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1488,
+        464
+      ],
+      "id": "7ac7f360-f744-4d41-8a96-38eee58a8e01",
+      "name": "MERGE UUID"
+    },
+    {
+      "parameters": {
+        "tableId": "report_info",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "report_id",
+              "fieldValue": "={{ $json.uuid }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $json.data }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        464
+      ],
+      "id": "c27a8c0b-130d-46ba-b1c8-e8a6834f96de",
+      "name": "C_REPORT_INFO",
+      "credentials": {
+        "supabaseApi": {
+          "id": "h72p2r0A8T6CTOHI",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OAI M": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "GenericAI1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lógica de Negócio Genérica para Pendências1": {
+      "main": [
+        [
+          {
+            "node": "GenericAI1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GenericAI1": {
+      "main": [
+        [
+          {
+            "node": "CON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CON": {
+      "main": [
+        [
+          {
+            "node": "MERGE UUID",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Call BuscaAPIs": {
+      "main": [
+        [
+          {
+            "node": "Lógica de Negócio Genérica para Pendências1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "MERGE UUID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Call BuscaAPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MERGE UUID": {
+      "main": [
+        [
+          {
+            "node": "C_REPORT_INFO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2c412b88-4d9d-4080-a322-0fa23d0e6201",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
+  },
+  "id": "zqm34Kauyaaixnvp",
+  "tags": []
+}
