@@ -9,22 +9,26 @@ import {
     Typography,
     Avatar,
     IconButton,
-    CircularProgress
+    CircularProgress,
+    Button
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PersonIcon from '@mui/icons-material/Person';
 import { keyframes } from '@mui/system';
 import { AnchorIcon } from '@/theme/icons';
 
-// Define a estrutura de uma mensagem
+import { ChatMessage, ChatResponse } from '@/types/chatType';
+import { sendChatMessage } from '@/service/chatService';
+import OperationDetailsModal from '@/components/shared/modals/OperationDetails';
+
+
 interface Message {
     id: number;
     text: string;
     sender: 'user' | 'ai';
+    data?: any;
 }
 
-// Animação para o indicador de "digitando"
 const pulse = keyframes`
   0% { opacity: 0.3; }
   50% { opacity: 1; }
@@ -38,6 +42,8 @@ export default function SimpleAIChat() {
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    // ADIÇÃO: Estado para manter um ID de sessão único para a conversa
+    const [sessionId] = useState(() => crypto.randomUUID());
     const chatEndRef = useRef<null | HTMLDivElement>(null);
 
     // Efeito para rolar para a última mensagem
@@ -45,41 +51,72 @@ export default function SimpleAIChat() {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
 
+    const [modalOpen, setModalOpen] = useState(false);
+    // Estado para guardar os dados do item selecionado
+    const [selectedData, setSelectedData] = useState(null);
 
-    const handleSend = () => {
+    const handleOpenModal = (data: any) => {
+        setSelectedData(data);
+        setModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        setSelectedData(null);
+    };
+
+    // =================================================================
+    // FUNÇÃO handleSend ATUALIZADA PARA USAR A API
+    // =================================================================
+    const handleSend = async () => {
         if (input.trim() === '' || isLoading) return;
-
         const userMessage: Message = { id: Date.now(), text: input, sender: 'user' };
         setMessages(prev => [...prev, userMessage]);
+
+        const currentInput = input;
         setInput('');
         setIsLoading(true);
 
-        setTimeout(() => {
-            const aiResponseText = getSimpleAIResponse(input);
-            const aiMessage: Message = { id: Date.now() + 1, text: aiResponseText, sender: 'ai' };
-            setMessages(prev => [...prev, aiMessage]);
-            setIsLoading(false);
-        }, 1500 + Math.random() * 500);
-    };
+        try {
+            // Prepara a mensagem para a API
+            const apiMessage: ChatMessage = {
+                sessionId: sessionId,
+                chatInput: currentInput,
+            };
 
-    const getSimpleAIResponse = (userInput: string): string => {
-        const lowerInput = userInput.toLowerCase();
-        if (lowerInput.includes('ajuda')) return 'Claro! Posso ajudar com status de navios, previsões de atraso ou documentação pendente. O que você gostaria de saber?';
-        if (lowerInput.includes('atrasado') || lowerInput.includes('msc-delay-006')) return 'O navio MSC-DELAY-006 tem um atraso preditivo de 10 horas devido a pendências na Receita Federal e Anvisa. A ação recomendada é submeter o manifesto de cargas perigosas com urgência.';
-        if (lowerInput.includes('cancelado') || lowerInput.includes('maersk-cancel-007')) return 'A operação do navio MAERSK-CANCEL-007 foi cancelada por irregularidades na inspeção de segurança. Recomendo iniciar um processo administrativo para a regularização.';
-        if (lowerInput.includes('olá') || lowerInput.includes('oi')) return `Olá! Em que posso ser útil hoje?`;
-        return "Não tenho certeza de como responder a isso. Poderia reformular sua pergunta? Posso fornecer informações sobre o status dos navios.";
+            // Chama a API
+            const response = await sendChatMessage(apiMessage);
+
+            const aiMessage: Message = {
+                id: Date.now() + 1,
+                text: response.displayText,
+                sender: 'ai',
+                data: response.data,
+            };
+
+            setMessages(prev => [...prev, aiMessage]);
+
+        } catch (error) {
+            console.error("Erro ao comunicar com a API:", error);
+            // Cria uma mensagem de erro para o usuário
+            const errorMessage: Message = {
+                id: Date.now() + 1,
+                text: 'Desculpe, ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.',
+                sender: 'ai',
+            };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
-        // ALTERAÇÃO: Estilos do Paper principal foram ajustados para 100% da tela.
         <Paper
-            elevation={0} // Removemos a sombra
+            elevation={0}
             sx={{
-                height: '95vh', // 100% da altura da viewport (tela)
+                height: '95vh',
                 display: 'flex',
                 flexDirection: 'column',
-                // Removemos borderRadius e centralização (mx) para ocupar a tela toda
                 borderRadius: 0,
                 boxShadow: 'none',
             }}
@@ -87,10 +124,7 @@ export default function SimpleAIChat() {
             {/* Cabeçalho do Chat */}
             <Box sx={{
                 p: 2,
-                backgroundColor: '#4D22E9',
-
                 background: 'linear-gradient(160deg, #4D22E9, #E65AAE)',
-
                 color: 'white',
                 flexShrink: 0
             }}>
@@ -123,7 +157,36 @@ export default function SimpleAIChat() {
                                     maxWidth: '80%'
                                 }}
                             >
-                                <Typography variant="body1">{msg.text}</Typography>
+                                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                                    {msg.text}
+                                </Typography>
+
+                                {/* ==============================================================
+                                  ADIÇÃO: Renderização formatada do JSON, se existir
+                                  ==============================================================
+                                */}
+                                {msg.data && typeof msg.data === 'object' && (
+                                    <Paper
+                                        component="pre"
+                                        variant="outlined"
+                                        sx={{
+                                            mt: 1.5,
+                                            p: 1,
+                                            fontSize: '0.8rem',
+                                            lineHeight: 1.4,
+                                            borderRadius: 2,
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-all',
+                                            backgroundColor: 'grey.200',
+                                            color: 'black',
+                                        }}
+                                    >
+                                        <Button variant="outlined" onClick={() => handleOpenModal(msg.data)}>
+                                            Ver Detalhes do Navio {msg.data.identificadorNavio}
+                                        </Button>
+                                    </Paper>
+                                )}
+
                             </Paper>
                             {msg.sender === 'user' && (
                                 <Avatar sx={{ bgcolor: 'grey.500' }}>
@@ -171,6 +234,11 @@ export default function SimpleAIChat() {
                     </IconButton>
                 </Stack>
             </Box>
+            <OperationDetailsModal
+                open={modalOpen}
+                onClose={handleCloseModal}
+                data={selectedData}
+            />
         </Paper>
     );
 }

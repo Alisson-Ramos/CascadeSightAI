@@ -25,8 +25,8 @@ export default function Home() {
         <Image
           src="/icons/logo.svg" // IMPORTANTE: Coloque sua logo na pasta /public
           alt="CascadeSightAI"
-          width={300}
-          height={300}
+          width={600}
+          height={600}
           priority // Ajuda a carregar a imagem principal mais rápido
         />
       </div>
