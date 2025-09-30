@@ -36,6 +36,7 @@ import { MinimalRoutes } from '../_utils/NavigationRoutes';
 import router from 'next/router';
 import { Modals } from './AppNavBarModals';
 import CustomModal from '../shared/modals/CustomModal';
+import { Suspense } from 'react';
 
 // -------------------------
 // Utils (Unchanged)
@@ -81,6 +82,27 @@ function SearchPages() {
         </Box>
     );
 }
+function TokenHandler({ setHasTokenId }: { setHasTokenId: (b: boolean) => void }) {
+    const searchParams = useSearchParams();
+
+    React.useEffect(() => {
+        const uuid = searchParams.get("uuid");
+        const token = searchParams.get("token");
+
+        if (localStorage.getItem("token") && localStorage.getItem("uuid")) {
+            setHasTokenId(false);
+        }
+
+        if (uuid && token) {
+            localStorage.setItem("uuid", uuid);
+            localStorage.setItem("token", token);
+            setHasTokenId(false);
+        }
+    }, [searchParams, setHasTokenId]);
+
+    return null; // não renderiza nada
+}
+
 
 export default function AppNavBar({ navigation }: { navigation: NavigationItem[] }) {
     const [isDrawerOpen, setDrawerOpen] = React.useState(true);
@@ -95,22 +117,7 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
             setUser(JSON.parse(storedUser));
         }
     }, []);
-
     const [hasTokenId, setHasTokenId] = React.useState(true);
-    const searchParams = useSearchParams();
-    React.useEffect(() => {
-        const uuid = searchParams.get('uuid');
-        const token = searchParams.get('token');
-        if (localStorage.getItem('token') && localStorage.getItem('uuid')) {
-            if (hasTokenId) setHasTokenId(false);
-        }
-
-        if (uuid && token) {
-            localStorage.setItem('uuid', uuid);
-            localStorage.setItem('token', token);
-            setHasTokenId(false);
-        }
-    }, [searchParams]);
 
 
     const name = user?.name ?? 'Carregando';
@@ -282,6 +289,9 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                 modalContent={modalContent}
                 onClose={() => setModalOpen(false)}
             />
+            <Suspense fallback={null}>
+                <TokenHandler setHasTokenId={setHasTokenId} />
+            </Suspense>
 
         </>
     );
