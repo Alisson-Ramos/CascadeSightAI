@@ -5,12 +5,16 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Box, Card, CardContent, Chip, Collapse, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Card, CardContent, Chip, Collapse, DialogContent, DialogTitle, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
 import NavTitle from '@/components/layout/PagesHeader';
 import { CheckCircleOutlineIcon, ExpandMoreIcon, WavesIcon } from '@/theme/icons';
 import { useTheme } from '@mui/material/styles';
 import { ShipData } from '@/interfaces/ShipData';
 import { statusConfig } from '@/types/Status';
+import { redirect, useSearchParams } from 'next/navigation';
+import CustomModal from '@/components/shared/modals/CustomModal';
+import { getDashboard } from '@/service/dashboardService';
+import { ReportType } from '@/types/reportType';
 
 // Tipos para as props do componente
 interface ShipStatusCardProps {
@@ -55,7 +59,7 @@ export function ShipStatusCard({ shipData, expanded, onClick }: ShipStatusCardPr
               <Chip
                 icon={config.icon}
                 label={hasMultipleIssues ? `${statusLabel} (${issues.length})` : statusLabel}
-                color={config.color}
+                color={config.color as "error" | "warning" | "info" | "default" | "primary" | "secondary" | "success"}
                 variant="filled"
                 size="small"
               />
@@ -136,10 +140,23 @@ const shipsData: ShipData[] = [
 // ------------------------------------------------------
 export default function Dashboard() {
   const theme = useTheme();
+  const [parsedShips, setParsedShips] = React.useState<ShipData[]>([]);
   const [expandedCardId, setExpandedCardId] = React.useState<string | null>(null);
   const handleCardClick = (shipId: string) => {
     setExpandedCardId(expandedCardId === shipId ? null : shipId);
   };
+  React.useEffect(() => {
+    const fetchDashboard = async () => {
+      const uuid = localStorage.getItem('uuid') || '' || undefined;
+      if (uuid && uuid != undefined && uuid != '') {
+        const jsonDataFromAPI: ReportType = await getDashboard(uuid);
+        setParsedShips(JSON.parse(jsonDataFromAPI.description));
+        console.log("Dados recebidos da API:", jsonDataFromAPI);
+      }
+    };
+    fetchDashboard();
+  }, [parsedShips]);
+
   return (
     <Grid container>
       {/* HEADER */}
@@ -153,7 +170,7 @@ export default function Dashboard() {
       <Grid container size={12} spacing={2}>
         {/* PENDÊNCIAS EM GERAL, ORDENDAS POR GRAVIDADE */}
         <Grid size={12} spacing={2}>
-          {shipsData.map((ship) => (
+          {parsedShips.map((ship) => (
             <ShipStatusCard
               key={ship.id}
               shipData={ship}
@@ -163,6 +180,7 @@ export default function Dashboard() {
           ))}
         </Grid>
       </Grid>
+
     </Grid >
   );
 }
