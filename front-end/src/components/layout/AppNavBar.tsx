@@ -256,9 +256,9 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                     {renderNavItems(navigation)}
                 </List>
 
-                <Box sx={{ flexGrow: 1 }} />
+                {/* <Box sx={{ flexGrow: 1 }} />
 
-                {/* <Box sx={{ p: 2, borderTop: `1px solid rgba(255, 255, 255, 0.1)`, display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ p: 2, borderTop: `1px solid rgba(255, 255, 255, 0.1)`, display: 'flex', alignItems: 'center' }}>
                     <Avatar sx={{ width: 32, height: 32, mr: 1.5, bgcolor: NavBarColors.active }}>{initials}</Avatar>
                     <Typography variant="body2" fontWeight="bold" sx={{ color: NavBarColors.textHover }}>{name}</Typography>
                     <Tooltip title="Sair">

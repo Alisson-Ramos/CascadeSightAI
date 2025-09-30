@@ -5,14 +5,13 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { Box, Card, CardContent, Chip, Collapse, DialogContent, DialogTitle, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Card, CardContent, Chip, Collapse, Divider, Grid, List, ListItem, ListItemIcon, ListItemText, Stack, Tooltip, Typography } from '@mui/material';
 import NavTitle from '@/components/layout/PagesHeader';
-import { CheckCircleOutlineIcon, ExpandMoreIcon, WavesIcon } from '@/theme/icons';
+import { ExpandMoreIcon, WavesIcon } from '@/theme/icons';
 import { useTheme } from '@mui/material/styles';
 import { ShipData } from '@/interfaces/ShipData';
 import { statusConfig } from '@/types/Status';
-import { redirect, useSearchParams } from 'next/navigation';
-import CustomModal from '@/components/shared/modals/CustomModal';
+
 import { getDashboard } from '@/service/dashboardService';
 import { ReportType } from '@/types/reportType';
 
@@ -89,7 +88,7 @@ export function ShipStatusCard({ shipData, expanded, onClick }: ShipStatusCardPr
             {recommendations.actions.map((action, index) => (
               <ListItem key={index} disablePadding>
                 <ListItemIcon sx={{ minWidth: 32 }}>
-                  <CheckCircleOutlineIcon color="success" fontSize="small" />
+                  {React.cloneElement(config.icon, { color: config.color })}
                 </ListItemIcon>
                 <ListItemText primary={action} />
               </ListItem>
@@ -100,40 +99,6 @@ export function ShipStatusCard({ shipData, expanded, onClick }: ShipStatusCardPr
     </Card>
   );
 }
-
-const shipsData: ShipData[] = [
-  {
-    id: 'MAERSK-CANCEL-007',
-    shipName: 'MAERSK-CANCEL-007',
-    shipType: 'Porta-Contêineres',
-    status: 'error', statusLabel: 'Cancelado',
-    issues: [
-      { authority: 'Agencia-Maritima', reason: 'Irregularidade na inspeção de segurança' },
-      { authority: 'Receita-Federal', reason: 'Carga não rastreável e sem conferência física' },
-    ],
-    recommendations: {
-      summary: 'Operação bloqueada por múltiplas falhas críticas. Risco de multa e inclusão em lista de observação.',
-      actions: [
-        'Notificar imediatamente o agente marítimo sobre o cancelamento.',
-        'Iniciar processo administrativo para regularização da carga.',
-      ],
-    },
-  },
-  {
-    id: 'MSC-DELAY-006',
-    shipName: 'MSC-DELAY-006',
-    shipType: 'Graneleiro',
-    status: 'warning', statusLabel: 'Atrasado',
-    issues: [{ authority: 'Anvisa', reason: 'Foco de mosquitos.' }, { authority: 'Capitania', reason: 'Problema com carta náutica.' }],
-    recommendations: {
-      summary: 'Atraso previsto de 10 horas devido a pendências. Risco de efeito cascata nas próximas atracações.',
-      actions: [
-        'Submeter com urgência o novo manifesto à Receita Federal.',
-        'Contratar serviço de dedetização certificado pela Anvisa.',
-      ],
-    },
-  },
-];
 
 // ------------------------------------------------------
 // Main Component
