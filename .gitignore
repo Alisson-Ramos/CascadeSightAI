@@ -12,14 +12,16 @@ front-end/.pnp
 
 # testing
 front-end/coverage
-
+/coverage
 # next.js
 front-end/.next/
 front-end/out/
+/.next/
+/out/
 
 # production
 front-end/build
-
+/build
 # misc
 .DS_Store
 *.pem

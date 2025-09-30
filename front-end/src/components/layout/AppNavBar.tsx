@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import logotipo from '../../images/icons/logo.png';
-import { usePathname, useRouter } from 'next/navigation';
+import { redirect, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import {
     Box,
     Drawer,
@@ -35,6 +35,7 @@ import { NavBarColors, SearchPagesSx } from '@/theme/theme';
 import { MinimalRoutes } from '../_utils/NavigationRoutes';
 import router from 'next/router';
 import { Modals } from './AppNavBarModals';
+import CustomModal from '../shared/modals/CustomModal';
 
 // -------------------------
 // Utils (Unchanged)
@@ -84,6 +85,8 @@ function SearchPages() {
 export default function AppNavBar({ navigation }: { navigation: NavigationItem[] }) {
     const [isDrawerOpen, setDrawerOpen] = React.useState(true);
     const [openMenus, setOpenMenus] = React.useState<{ [key: string]: boolean }>({});
+
+
     const [user, setUser] = React.useState<{ name: string; identifier: string } | null>(null);
     const pathname = usePathname();
     React.useEffect(() => {
@@ -92,6 +95,23 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
             setUser(JSON.parse(storedUser));
         }
     }, []);
+
+    const [hasTokenId, setHasTokenId] = React.useState(true);
+    const searchParams = useSearchParams();
+    React.useEffect(() => {
+        const uuid = searchParams.get('uuid');
+        const token = searchParams.get('token');
+        if (localStorage.getItem('token') && localStorage.getItem('uuid')) {
+            if (hasTokenId) setHasTokenId(false);
+        }
+
+        if (uuid && token) {
+            localStorage.setItem('uuid', uuid);
+            localStorage.setItem('token', token);
+            setHasTokenId(false);
+        }
+    }, [searchParams]);
+
 
     const name = user?.name ?? 'Carregando';
     const initials = name
@@ -236,9 +256,9 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                     {renderNavItems(navigation)}
                 </List>
 
-                <Box sx={{ flexGrow: 1 }} />
+                {/* <Box sx={{ flexGrow: 1 }} />
 
-                {/* <Box sx={{ p: 2, borderTop: `1px solid rgba(255, 255, 255, 0.1)`, display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ p: 2, borderTop: `1px solid rgba(255, 255, 255, 0.1)`, display: 'flex', alignItems: 'center' }}>
                     <Avatar sx={{ width: 32, height: 32, mr: 1.5, bgcolor: NavBarColors.active }}>{initials}</Avatar>
                     <Typography variant="body2" fontWeight="bold" sx={{ color: NavBarColors.textHover }}>{name}</Typography>
                     <Tooltip title="Sair">
@@ -250,6 +270,13 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                     </Tooltip>
                 </Box> */}
             </Drawer>
+            <CustomModal open={hasTokenId} title='Acesso Negado' onClose={() => { redirect('/') }}>
+                <DialogContent>
+                    <Typography variant="body1">
+                        Você não tem permissão para acessar esta página. Por favor, solicite ao administrador seu acesso.
+                    </Typography>
+                </DialogContent>
+            </CustomModal>
             <Modals
                 modalopen={isModalOpen}
                 modalContent={modalContent}
