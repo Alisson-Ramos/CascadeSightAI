@@ -240,7 +240,7 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                     </Grid>
                     <Grid size={12}>
                         <Typography variant="caption" sx={{ color: NavBarColors.icon, letterSpacing: '1px', fontSize: 8 }}>
-                            SOLUÇÃO PARA ANÁLISE DE PENDêNCIAS
+                            SOLUÇÃO PARA PREVISÕES DE PENDêNCIAS
                         </Typography>
                     </Grid>
                 </Grid>
