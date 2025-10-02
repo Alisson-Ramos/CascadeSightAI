@@ -14,7 +14,7 @@ import { statusConfig } from '@/types/Status';
 
 import { getDashboard } from '@/service/dashboardService';
 import { ReportType } from '@/types/reportType';
-import { EmptyState } from '@/components/shared/EmptyState';
+import { EmptyState } from '@/components/shared/emptyState';
 
 // Tipos para as props do componente
 interface ShipStatusCardProps {
