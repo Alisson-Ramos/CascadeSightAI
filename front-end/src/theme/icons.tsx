@@ -69,3 +69,4 @@ export { default as WarningAmberIcon } from '@mui/icons-material/WarningAmber';
 export { default as HourglassTopIcon } from '@mui/icons-material/HourglassTop';
 export { default as EmergencyIcon } from '@mui/icons-material/LocalHospital';
 export { default as CheckCircleOutlineIcon } from '@mui/icons-material/CheckCircleOutline';
+export { default as PublicIcon } from '@mui/icons-material/Public';

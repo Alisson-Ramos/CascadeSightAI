@@ -37,6 +37,18 @@ const faqItems = [
         question: 'As recomendações são geradas automaticamente?',
         answer: 'Sim. Nossos algoritmos de IA analisam a natureza de cada pendência e o contexto operacional para sugerir um conjunto de ações recomendadas. O objetivo é fornecer um guia claro para a resolução rápida de problemas.'
     },
+    {
+        question: 'Qual o principal impacto do CascadeSightAI no Porto?',
+        answer: 'O CascadeSightAI elimina a necessidade de fundeio. Ao garantir que todos os serviços estejam alinhados e prontos, removemos o tempo de espera da equação logística, liberando capacidade do canal de acesso e reduzindo custos.'
+    },
+    {
+        question: 'O que o Mecanismo Preditivo de I.A. faz na plataforma?',
+        answer: 'Sim. Nossos algoritmos de IA analisam a natureza de cada pendência e o contexto operacional para sugerir um conjunto de ações recomendadas. O objetivo é fornecer um guia claro para a resolução rápida de problemas.'
+    },
+    {
+        question: 'As recomendações são geradas automaticamente?',
+        answer: 'Sim. Nossos algoritmos de IA analisam a natureza de cada pendência e o contexto operacional para sugerir um conjunto de ações recomendadas. O objetivo é fornecer um guia claro para a resolução rápida de problemas.'
+    },
 ];
 
 

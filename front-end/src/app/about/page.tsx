@@ -17,12 +17,16 @@ import {
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Paper
+    Paper,
+    Tooltip
 } from '@mui/material';
-import { CodeIcon, GitHubIcon, GroupsIcon, HandshakeIcon, LinkIcon } from '@/theme/icons';
+// ADIÇÃO: Ícones para a nova seção ESG (substitua pelos seus ícones reais)
+import { VerifiedUser as EsgIcon } from '@mui/icons-material';
+import { CodeIcon, GitHubIcon, GroupsIcon, HandshakeIcon, LinkIcon, PublicIcon } from '@/theme/icons';
+
 
 // ------------------------------------------------------
-// DADOS DA PÁGINA (Você pode substituir por dados reais)
+// DADOS DA PÁGINA
 // ------------------------------------------------------
 
 const teamMembers = [
@@ -30,39 +34,38 @@ const teamMembers = [
         name: 'Alisson R. Santos',
         role: 'Desenvolvedor Full-Stack, Designer & IA',
         description: 'Especialista em criar soluções inteligentes e eficientes, liderando o desenvolvimento técnico do projeto desde a concepção até a implementação.',
-        imageUrl: 'equipe/alisson.jpeg', // Substitua pelo caminho da imagem
+        imageUrl: 'equipe/alisson.jpeg',
     },
     {
         name: 'Ronald Evangelista',
         role: 'Administrador, Desenvolvedor, Idealizador',
         description: 'Responsável pela arquitetura de dados e pela análise dos requisitos do sistema, garantindo que a solução atenda às necessidades operacionais.',
-        imageUrl: '/path/to/your/image2.jpg',
+        imageUrl: 'equipe/ronald.webp',
     },
     {
         name: 'Davi Coelho',
-        role: 'Administrador, Desenvolvedor, Idealizador',
+        role: 'Administrador',
         description: 'Responsável pela arquitetura de dados e pela análise dos requisitos do sistema, garantindo que a solução atenda às necessidades operacionais.',
-        imageUrl: '/path/to/your/image2.jpg',
+        imageUrl: 'equipe/davi.jpeg',
     },
     {
         name: 'Geovanna Barros',
-        role: 'Administrador, Desenvolvedor, Idealizador',
+        role: 'Administradora',
         description: 'Responsável pela arquitetura de dados e pela análise dos requisitos do sistema, garantindo que a solução atenda às necessidades operacionais.',
-        imageUrl: '/path/to/your/image2.jpg',
+        imageUrl: 'equipe/geovanna.webp',
     },
     {
         name: 'Matheus Corrêa',
-        role: 'Administrador, Desenvolvedor, Idealizador',
-        description: 'Responsável pela arquitetura de dados e pela análise dos requisitos do sistema, garantindo que a solução atenda às necessidades operacionais.',
-        imageUrl: '/path/to/your/image2.jpg',
+        role: 'Administrador',
+        description: 'Responsável pela arquitetura de dados e pela análise dos requisitos do sistema, garantindo que a solution atenda às necessidades operacionais.',
+        imageUrl: 'equipe/matheus.webp',
     },
-
 ];
 
 const projectLinks = [
     {
         name: 'Repositório no GitHub',
-        url: 'https://github.com/Alisson-Ramos/CodeSightAI-PortoHack', // Substitua pelo seu link
+        url: 'https://github.com/Alisson-Ramos/CodeSightAI-PortoHack',
         icon: <GitHubIcon />,
     },
     {
@@ -72,11 +75,10 @@ const projectLinks = [
     }
 ];
 
-// DADOS PARA A NOVA SEÇÃO DE LOGOS
 const partnersAndSupporters = [
     {
         name: 'Porto Hack',
-        logoUrl: '/icons/portohack.jpg', // Coloque os logos na pasta /public/logos/
+        logoUrl: '/icons/portohack.jpg',
         websiteUrl: 'https://www.portohacksantos.com.br/',
     },
     {
@@ -95,6 +97,35 @@ const partnersAndSupporters = [
         websiteUrl: 'https://github.com/Codeco3',
     },
 ];
+
+const sustainableDevelopmentGoals = [
+    {
+        id: 'ODS 8',
+        title: 'Trabalho Decente e Crescimento Econômico',
+        description: 'Ao otimizar operações, promovemos um ambiente de trabalho mais eficiente e seguro, contribuindo para o crescimento econômico sustentável do setor portuário.',
+        iconUrl: '/ods/ods8.webp',
+    },
+    {
+        id: 'ODS 9',
+        title: 'Indústria, Inovação e Infraestrutura',
+        description: 'Nossa plataforma é uma inovação tecnológica que moderniza a infraestrutura portuária, tornando a indústria logística mais resiliente e inteligente.',
+        iconUrl: '/ods/ods9.jpeg',
+    },
+    {
+        id: 'ODS 11',
+        title: 'Cidades e Comunidades Sustentáveis',
+        description: 'A eficiência portuária reduz o congestionamento em áreas urbanas próximas aos portos, diminuindo a poluição e melhorando a qualidade de vida.',
+        iconUrl: '/ods/ods11.jpg',
+    },
+    {
+        id: 'ODS 17',
+        title: 'Parcerias e Meios de Implementação',
+        description: 'Fomentamos parcerias entre os diversos atores do ecossistema portuário, criando uma rede colaborativa para alcançar os objetivos de sustentabilidade.',
+        iconUrl: '/ods/ods17.webp',
+    },
+];
+
+
 
 
 // ------------------------------------------------------
@@ -139,7 +170,6 @@ export default function AboutPage() {
             {/* SEÇÃO 2: CONTEÚDO PRINCIPAL */}
             <Container maxWidth="lg" sx={{ py: 6 }}>
                 <Stack spacing={8}>
-
                     {/* DESCRIÇÃO DO PROJETO */}
                     <Paper elevation={0} variant="outlined" sx={{ p: 4, borderRadius: 3 }}>
                         <Stack spacing={2} alignItems="center" textAlign="center">
@@ -152,6 +182,50 @@ export default function AboutPage() {
                             </Typography>
                         </Stack>
                     </Paper>
+                    {/* SEÇÃO ODS */}
+                    <Box textAlign="center">
+                        <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
+                            <PublicIcon color="primary" sx={{ fontSize: 40 }} />
+                            <Typography variant="h4" component="h2" fontWeight="bold">
+                                Nosso Impacto nos ODS
+                            </Typography>
+                            <Typography variant="body1" color="text.secondary" maxWidth="md">
+                                Acreditamos que a tecnologia deve gerar valor para a sociedade. Veja como o CascadeSightAI contribui para os Objetivos de Desenvolvimento Sustentável da ONU.
+                            </Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={{ xs: 2, sm: 4 }} justifyContent="center" alignItems="center" flexWrap="wrap">
+                            {sustainableDevelopmentGoals.map((ods) => (
+                                <Tooltip key={ods.id} arrow title={
+                                    <Box sx={{ p: 1 }}>
+                                        <Typography color="inherit" component="div" fontWeight="bold">{ods.id}: {ods.title}</Typography>
+                                        <Typography variant="body2" component="div" sx={{ mt: 0.5 }}>{ods.description}</Typography>
+                                    </Box>
+                                }>
+                                    <Box component="img" src={ods.iconUrl} alt={ods.title} sx={{
+                                        cursor: 'pointer',
+                                        width: { xs: 60, sm: 80, md: 100 },
+                                        height: 'auto',
+                                        transition: 'transform 0.2s ease-in-out',
+                                        '&:hover': { transform: 'scale(1.1)' },
+                                    }} />
+                                </Tooltip>
+                            ))}
+                        </Stack>
+                    </Box>
+                    {/* ====================================================== */}
+                    {/* NOVA SEÇÃO: NOSSO COMPROMISSO ESG                     */}
+                    {/* ====================================================== */}
+                    <Box textAlign="center">
+                        <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
+                            <EsgIcon color="primary" sx={{ fontSize: 40 }} />
+                            <Typography variant="h4" component="h2" fontWeight="bold">
+                                Nosso Compromisso ESG
+                            </Typography>
+                            <Typography variant="body1" color="text.secondary" maxWidth="md">
+                                Atuamos com responsabilidade, integrando práticas ambientais, sociais e de governança em nossa solução para gerar valor sustentável.
+                            </Typography>
+                        </Stack>
+                    </Box>
 
                     {/* EQUIPE */}
                     <Box textAlign="center">
@@ -168,21 +242,11 @@ export default function AboutPage() {
                             {teamMembers.map((member) => (
                                 <Grid key={member.name} size={12}>
                                     <Card elevation={0} sx={{ textAlign: 'center', backgroundColor: 'transparent' }}>
-                                        <Avatar
-                                            alt={member.name}
-                                            src={member.imageUrl}
-                                            sx={{ width: 120, height: 120, margin: '0 auto 16px', boxShadow: 3 }}
-                                        />
+                                        <Avatar alt={member.name} src={member.imageUrl} sx={{ width: 120, height: 120, margin: '0 auto 16px', boxShadow: 3 }} />
                                         <CardContent sx={{ p: 1 }}>
-                                            <Typography variant="h6" component="div" fontWeight="bold">
-                                                {member.name}
-                                            </Typography>
-                                            <Typography sx={{ mb: 1.5 }} color="primary.main">
-                                                {member.role}
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                {member.description}
-                                            </Typography>
+                                            <Typography variant="h6" component="div" fontWeight="bold">{member.name}</Typography>
+                                            <Typography sx={{ mb: 1.5 }} color="primary.main">{member.role}</Typography>
+                                            <Typography variant="body2" color="text.secondary">{member.description}</Typography>
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -190,9 +254,7 @@ export default function AboutPage() {
                         </Grid>
                     </Box>
 
-                    {/* ====================================================== */}
-                    {/* NOVA SEÇÃO: IDEALIZADORES E APOIADORES (LOGOS)         */}
-                    {/* ====================================================== */}
+                    {/* IDEALIZADORES E APOIADORES */}
                     <Box textAlign="center">
                         <Stack spacing={2} alignItems="center" sx={{ mb: 4 }}>
                             <HandshakeIcon color="primary" sx={{ fontSize: 40 }} />
@@ -203,29 +265,23 @@ export default function AboutPage() {
                                 Este projeto é impulsionado pela colaboração com instituições de ponta e pelo uso de tecnologias inovadoras.
                             </Typography>
                         </Stack>
-
                         <Grid container spacing={{ xs: 4, md: 2 }} justifyContent="center" alignItems="center">
                             {partnersAndSupporters.map((partner) => (
-                                <Grid key={partner.name} size={2}>
+                                <Grid key={partner.name} size={3}>
                                     <MuiLink href={partner.websiteUrl} target="_blank" rel="noopener noreferrer" sx={{ display: 'block' }}>
-                                        <Box
-                                            component="img"
-                                            src={partner.logoUrl}
-                                            alt={`Logo ${partner.name}`}
-                                            sx={{
-                                                width: '100%',
-                                                maxWidth: 120, // Tamanho máximo para os logos
-                                                height: 'auto',
-                                                filter: 'grayscale(100%)', // Começa em preto e branco
-                                                opacity: 0.7,
-                                                transition: 'all 0.3s ease-in-out',
-                                                '&:hover': {
-                                                    filter: 'grayscale(0%)', // Fica colorido no hover
-                                                    opacity: 1,
-                                                    transform: 'scale(1.05)',
-                                                },
-                                            }}
-                                        />
+                                        <Box component="img" src={partner.logoUrl} alt={`Logo ${partner.name}`} sx={{
+                                            width: '100%',
+                                            maxWidth: 120,
+                                            height: 'auto',
+                                            filter: 'grayscale(100%)',
+                                            opacity: 0.7,
+                                            transition: 'all 0.3s ease-in-out',
+                                            '&:hover': {
+                                                filter: 'grayscale(0%)',
+                                                opacity: 1,
+                                                transform: 'scale(1.05)',
+                                            },
+                                        }} />
                                     </MuiLink>
                                 </Grid>
                             ))}
@@ -245,9 +301,7 @@ export default function AboutPage() {
                                 {projectLinks.map((link, index) => (
                                     <ListItem key={link.name} disablePadding divider={index < projectLinks.length - 1}>
                                         <ListItemButton component={MuiLink} href={link.url} target="_blank" rel="noopener noreferrer">
-                                            <ListItemIcon>
-                                                {link.icon}
-                                            </ListItemIcon>
+                                            <ListItemIcon>{link.icon}</ListItemIcon>
                                             <ListItemText primary={link.name} />
                                         </ListItemButton>
                                     </ListItem>

@@ -14,6 +14,7 @@ import { statusConfig } from '@/types/Status';
 
 import { getDashboard } from '@/service/dashboardService';
 import { ReportType } from '@/types/reportType';
+import { EmptyState } from '@/components/shared/EmptyState';
 
 // Tipos para as props do componente
 interface ShipStatusCardProps {
@@ -135,6 +136,11 @@ export default function Dashboard() {
       <Grid container size={12} spacing={2}>
         {/* PENDÊNCIAS EM GERAL, ORDENDAS POR GRAVIDADE */}
         <Grid size={12} spacing={2}>
+          {parsedShips.length === 0 && (
+            <EmptyState title="Nenhum navio com pendências no momento" subtitle='Todos os navios estão em conformidade.' icon={<WavesIcon color="primary" sx={{ fontSize: 60 }} />} >
+
+            </EmptyState>
+          )}
           {parsedShips.map((ship) => (
             <ShipStatusCard
               key={ship.id}
