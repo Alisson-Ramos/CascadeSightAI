@@ -82,15 +82,23 @@ function SearchPages() {
         </Box>
     );
 }
-function TokenHandler({ setHasTokenId }: { setHasTokenId: (b: boolean) => void }) {
+
+function TokenHandler({ setHasTokenId, pathname }: { setHasTokenId: (b: boolean) => void; pathname: string }) {
     const searchParams = useSearchParams();
 
     React.useEffect(() => {
+        // NEW: Check if the path is /chat and grant access
+        if (pathname === '/chat') {
+            setHasTokenId(false);
+            return;
+        }
+
         const uuid = searchParams.get("uuid");
         const token = searchParams.get("token");
 
         if (localStorage.getItem("token") && localStorage.getItem("uuid")) {
             setHasTokenId(false);
+            return; // return to avoid re-checking
         }
 
         if (uuid && token) {
@@ -98,10 +106,12 @@ function TokenHandler({ setHasTokenId }: { setHasTokenId: (b: boolean) => void }
             localStorage.setItem("token", token);
             setHasTokenId(false);
         }
-    }, [searchParams, setHasTokenId]);
+    }, [searchParams, setHasTokenId, pathname]); // MODIFIED: Added pathname to dependency array
 
     return null; // não renderiza nada
 }
+
+
 
 
 export default function AppNavBar({ navigation }: { navigation: NavigationItem[] }) {
@@ -290,7 +300,7 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                 onClose={() => setModalOpen(false)}
             />
             <Suspense fallback={null}>
-                <TokenHandler setHasTokenId={setHasTokenId} />
+                <TokenHandler setHasTokenId={setHasTokenId} pathname={pathname} />
             </Suspense>
 
         </>
