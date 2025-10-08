@@ -88,7 +88,7 @@ function TokenHandler({ setHasTokenId, pathname }: { setHasTokenId: (b: boolean)
 
     React.useEffect(() => {
         // NEW: Check if the path is /chat and grant access
-        if (pathname === '/chat') {
+        if (pathname === '/chat' || pathname === '/help' || pathname === '/about') {
             setHasTokenId(false);
             return;
         }
@@ -250,7 +250,7 @@ export default function AppNavBar({ navigation }: { navigation: NavigationItem[]
                     </Grid>
                     <Grid size={12}>
                         <Typography variant="caption" sx={{ color: NavBarColors.icon, letterSpacing: '1px', fontSize: 8 }}>
-                            SOLUÇÃO PARA PREVISÕES DE PENDêNCIAS
+                            SOLUÇÃO PARA PREVISÕES DE PENDÊNCIAS
                         </Typography>
                     </Grid>
                 </Grid>
