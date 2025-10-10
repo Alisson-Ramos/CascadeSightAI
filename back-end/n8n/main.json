@@ -218,12 +218,12 @@
     },
     {
       "parameters": {
-        "jsCode": "// =================================================================\n// CONFIGURAÇÕES E VARIÁVEIS GLOBAIS\n// =================================================================\n\nconst uuid = $input.first().json.uuid; \nconst token = $input.first().json.token; \nconst siteUrl = `https://www.seusite.com.br/verificar?uuid=${uuid}&token=${token}`;\n\nconst colors = {\n    background: '#f4f7f9',\n    cardBackground: '#ffffff',\n    textPrimary: '#333333',\n    textSecondary: '#666666',\n    border: '#dddddd',\n    \n    // Gradiente para o cabeçalho\n    headerGradient: 'linear-gradient(160deg, #4D22E9, #E65AAE)',\n    headerText: '#ffffff', \n\n    successBackground: '#dff0d8',\n    successBorder: '#3c763d',\n    successText: '#3c763d',\n    \n    warningBackground: '#fff3e0',\n    warningBorder: '#ff9800',\n    warningText: '#e65100',\n    \n    emergencyBackground: '#ffebee',\n    emergencyBorder: '#c62828',\n    emergencyText: '#c62828',\n\n    buttonBackground: '#1976d2',\n    buttonText: '#ffffff'\n};\n\n\n// =================================================================\n// FUNÇÃO AUXILIAR PARA GERAR OS CARDS DOS NAVIOS\n// =================================================================\n\nfunction gerarHtmlCardsNavios(naviosArray) {\n    if (!naviosArray || naviosArray.length === 0) {\n        return `<tr><td style=\"padding-bottom: 20px;\"><p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhum navio encontrado nos dados fornecidos.</p></td></tr>`;\n    }\n\n    const cardsHtml = naviosArray.map(navio => {\n        let config;\n        switch (navio.status) {\n            case 'info':\n                config = { bgColor: colors.successBackground, borderColor: colors.successBorder, textColor: colors.successText };\n                break;\n            case 'warning':\n                config = { bgColor: colors.warningBackground, borderColor: colors.warningBorder, textColor: colors.warningText };\n                break;\n            case 'emergency':\n            case 'error':\n                config = { bgColor: colors.emergencyBackground, borderColor: colors.emergencyBorder, textColor: colors.emergencyText };\n                break;\n            default:\n                config = { bgColor: '#f0f0f0', borderColor: '#ccc', textColor: '#333' };\n        }\n\n        const issuesContent = (navio.issues && navio.issues.length > 0) ?\n            `\n            <h3 style=\"margin-top: 0; margin-bottom: 10px; font-size: 16px; color: ${colors.textPrimary};\">Pendências Identificadas</h3>\n            <ul style=\"margin: 0; padding-left: 20px; color: ${colors.textSecondary}; font-size: 14px;\">\n                ${navio.issues.map(issue => `\n                    <li style=\"margin-bottom: 8px; line-height: 1.5;\">\n                        <strong style=\"color: ${colors.textPrimary};\">${issue.authority}:</strong> ${issue.reason}\n                    </li>\n                `).join('')}\n            </ul>\n            ` :\n            `<p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhuma pendência identificada.</p>`;\n\n        return `\n            <tr>\n                <td style=\"padding-bottom: 20px;\">\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse; border: 1px solid ${config.borderColor}; border-radius: 8px; background-color: ${colors.cardBackground}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n                        <tr>\n                            <td style=\"padding: 15px 20px; background-color: ${config.bgColor}; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 1px solid ${config.borderColor};\">\n                                <h2 style=\"margin: 0; font-size: 18px; color: ${config.textColor};\">\n                                    ${navio.shipName} - <span style=\"text-transform: uppercase;\">${navio.statusLabel}</span>\n                                </h2>\n                            </td>\n                        </tr>\n                        <tr>\n                            <td style=\"padding: 20px;\">\n                                ${issuesContent}\n                            </td>\n                        </tr>\n                    </table>\n                </td>\n            </tr>\n        `;\n    }).join('');\n\n    return cardsHtml;\n}\n\n\n// =================================================================\n// LÓGICA PRINCIPAL DO NÓ\n// =================================================================\n\nconst naviosComAlerta = $input.first().json.data;\n\n// Define a prioridade de cada status\nconst statusPriority = {\n    'emergency': 1,\n    'error': 2,\n    'warning': 3,\n    'info': 4,\n};\n\n// Ordena o array 'naviosComAlerta'\nnaviosComAlerta.sort((a, b) => {\n    const priorityA = statusPriority[a.status] || 99;\n    const priorityB = statusPriority[b.status] || 99;\n    return priorityA - priorityB;\n});\n\n// Gera o HTML dinâmico dos cards com a lista já ordenada\nconst cardsNaviosHtml = gerarHtmlCardsNavios(naviosComAlerta);\n\n// Monta o documento HTML final do email\nconst finalHtml = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Alerta de Status Operacional</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: ${colors.background}; font-family: Arial, Helvetica, sans-serif;\">\n    <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n        <tr>\n            <td align=\"center\" style=\"padding: 20px 0;\">\n                <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"border-collapse: collapse; background-color: ${colors.cardBackground}; border: 1px solid ${colors.border};\">\n                    <tr>\n                        <td align=\"center\" style=\"padding: 30px 20px; background: ${colors.headerGradient}; color: ${colors.headerText};\">\n                            <h1 style=\"margin: 0; font-size: 24px; font-weight: bold;\">Alerta de Status Operacional</h1>\n                            <p style=\"margin: 5px 0 0; font-size: 14px;\">Atualizações sobre as operações portuárias em ${new Date().toLocaleDateString('pt-BR')}.</p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 30px 25px 10px 25px;\">\n                            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n                                ${cardsNaviosHtml}\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px 30px 40px 30px;\">\n                            <a href=\"${siteUrl}\" target=\"_blank\" style=\"display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: ${colors.buttonText}; background-color: ${colors.buttonBackground}; text-decoration: none; border-radius: 5px;\">\n                                Ver Detalhes na Plataforma\n                            </a>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px; background-color: #eeeeee; color: #888888; font-size: 12px;\">\n                            <p style=\"margin: 0;\">Este é um relatório automático. Não responda a este email.</p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>`;\n\n// Retorna o HTML completo para ser usado no próximo nó (ex: Send Email)\nreturn {\n    json: {\n        html: finalHtml\n    }\n};"
+        "jsCode": "// =================================================================\n// CONFIGURAÇÕES E VARIÁVEIS GLOBAIS\n// =================================================================\n\nconst uuid = $input.first().json.uuid; \nconst token = $input.first().json.token; \nconst siteUrl = `https://www.codecohub.com/dashboard?uuid=${uuid}&token=${token}`;\n\nconst colors = {\n    background: '#f4f7f9',\n    cardBackground: '#ffffff',\n    textPrimary: '#333333',\n    textSecondary: '#666666',\n    border: '#dddddd',\n    \n    // Gradiente para o cabeçalho\n    headerGradient: 'linear-gradient(160deg, #4D22E9, #E65AAE)',\n    headerText: '#ffffff', \n\n    successBackground: '#dff0d8',\n    successBorder: '#3c763d',\n    successText: '#3c763d',\n    \n    warningBackground: '#fff3e0',\n    warningBorder: '#ff9800',\n    warningText: '#e65100',\n    \n    emergencyBackground: '#ffebee',\n    emergencyBorder: '#c62828',\n    emergencyText: '#c62828',\n\n    buttonBackground: '#1976d2',\n    buttonText: '#ffffff'\n};\n\n\n// =================================================================\n// FUNÇÃO AUXILIAR PARA GERAR OS CARDS DOS NAVIOS\n// =================================================================\n\nfunction gerarHtmlCardsNavios(naviosArray) {\n    if (!naviosArray || naviosArray.length === 0) {\n        return `<tr><td style=\"padding-bottom: 20px;\"><p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhum navio encontrado nos dados fornecidos.</p></td></tr>`;\n    }\n\n    const cardsHtml = naviosArray.map(navio => {\n        let config;\n        switch (navio.status) {\n            case 'info':\n                config = { bgColor: colors.successBackground, borderColor: colors.successBorder, textColor: colors.successText };\n                break;\n            case 'warning':\n                config = { bgColor: colors.warningBackground, borderColor: colors.warningBorder, textColor: colors.warningText };\n                break;\n            case 'emergency':\n            case 'error':\n                config = { bgColor: colors.emergencyBackground, borderColor: colors.emergencyBorder, textColor: colors.emergencyText };\n                break;\n            default:\n                config = { bgColor: '#f0f0f0', borderColor: '#ccc', textColor: '#333' };\n        }\n\n        const issuesContent = (navio.issues && navio.issues.length > 0) ?\n            `\n            <h3 style=\"margin-top: 0; margin-bottom: 10px; font-size: 16px; color: ${colors.textPrimary};\">Pendências Identificadas</h3>\n            <ul style=\"margin: 0; padding-left: 20px; color: ${colors.textSecondary}; font-size: 14px;\">\n                ${navio.issues.map(issue => `\n                    <li style=\"margin-bottom: 8px; line-height: 1.5;\">\n                        <strong style=\"color: ${colors.textPrimary};\">${issue.authority}:</strong> ${issue.reason}\n                    </li>\n                `).join('')}\n            </ul>\n            ` :\n            `<p style=\"font-size: 14px; color: ${colors.textSecondary};\">Nenhuma pendência identificada.</p>`;\n\n        return `\n            <tr>\n                <td style=\"padding-bottom: 20px;\">\n                    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse; border: 1px solid ${config.borderColor}; border-radius: 8px; background-color: ${colors.cardBackground}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);\">\n                        <tr>\n                            <td style=\"padding: 15px 20px; background-color: ${config.bgColor}; border-top-left-radius: 8px; border-top-right-radius: 8px; border-bottom: 1px solid ${config.borderColor};\">\n                                <h2 style=\"margin: 0; font-size: 18px; color: ${config.textColor};\">\n                                    ${navio.shipName} - <span style=\"text-transform: uppercase;\">${navio.statusLabel}</span>\n                                </h2>\n                            </td>\n                        </tr>\n                        <tr>\n                            <td style=\"padding: 20px;\">\n                                ${issuesContent}\n                            </td>\n                        </tr>\n                    </table>\n                </td>\n            </tr>\n        `;\n    }).join('');\n\n    return cardsHtml;\n}\n\n\n// =================================================================\n// LÓGICA PRINCIPAL DO NÓ\n// =================================================================\n\nconst naviosComAlerta = $input.first().json.data;\n\n// Define a prioridade de cada status\nconst statusPriority = {\n    'emergency': 1,\n    'error': 2,\n    'warning': 3,\n    'info': 4,\n};\n\n// Ordena o array 'naviosComAlerta'\nnaviosComAlerta.sort((a, b) => {\n    const priorityA = statusPriority[a.status] || 99;\n    const priorityB = statusPriority[b.status] || 99;\n    return priorityA - priorityB;\n});\n\n// Gera o HTML dinâmico dos cards com a lista já ordenada\nconst cardsNaviosHtml = gerarHtmlCardsNavios(naviosComAlerta);\n\n// Monta o documento HTML final do email\nconst finalHtml = `\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Alerta de Status Operacional</title>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: ${colors.background}; font-family: Arial, Helvetica, sans-serif;\">\n    <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n        <tr>\n            <td align=\"center\" style=\"padding: 20px 0;\">\n                <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"border-collapse: collapse; background-color: ${colors.cardBackground}; border: 1px solid ${colors.border};\">\n                    <tr>\n                        <td align=\"center\" style=\"padding: 30px 20px; background: ${colors.headerGradient}; color: ${colors.headerText};\">\n                            <h1 style=\"margin: 0; font-size: 24px; font-weight: bold;\">Alerta de Status Operacional</h1>\n                            <p style=\"margin: 5px 0 0; font-size: 14px;\">Atualizações sobre as operações portuárias em ${new Date().toLocaleDateString('pt-BR')}.</p>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td style=\"padding: 30px 25px 10px 25px;\">\n                            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-collapse: collapse;\">\n                                ${cardsNaviosHtml}\n                            </table>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px 30px 40px 30px;\">\n                            <a href=\"${siteUrl}\" target=\"_blank\" style=\"display: inline-block; padding: 15px 30px; font-size: 16px; font-weight: bold; color: ${colors.buttonText}; background-color: ${colors.buttonBackground}; text-decoration: none; border-radius: 5px;\">\n                                Ver Detalhes na Plataforma\n                            </a>\n                        </td>\n                    </tr>\n                    <tr>\n                        <td align=\"center\" style=\"padding: 20px; background-color: #eeeeee; color: #888888; font-size: 12px;\">\n                            <p style=\"margin: 0;\">Este é um relatório automático. Não responda a este email.</p>\n                        </td>\n                    </tr>\n                </table>\n            </td>\n        </tr>\n    </table>\n</body>\n</html>`;\n\n// Retorna o HTML completo para ser usado no próximo nó (ex: Send Email)\nreturn {\n    json: {\n        html: finalHtml\n    }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
+        160,
         -16
       ],
       "id": "14c85171-75fa-4c9a-a6ea-fa2b7a5ec0d1",
@@ -231,26 +231,78 @@
     },
     {
       "parameters": {
-        "sendTo": "=alisson.r.santos92@gmail.com,ronald.evangelista@aluno.ifsp.edu.br\n",
-        "subject": "=Alerta de Status Operacional",
-        "message": "={{ $json.html }}",
+        "path": "dashboard",
+        "responseMode": "responseNode",
         "options": {}
       },
-      "type": "n8n-nodes-base.gmail",
+      "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        176,
-        -16
+        -624,
+        -224
       ],
-      "id": "ea5a2118-7e8b-4563-b4e2-363a9f41f39e",
-      "name": "Envio do Email",
-      "webhookId": "a3ac24d8-7f4a-440d-b212-3881cacf3fd6",
+      "id": "fe18f43d-35a7-466b-b650-a88ae1e3e22b",
+      "name": "getDashboard",
+      "webhookId": "240e5d3c-d6b3-4b40-bb3c-237d324b0d19",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "report_info",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "report_id",
+              "keyValue": "={{ $json.query.uuid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -224
+      ],
+      "id": "00d24bc4-d09b-47ed-866d-5d23541ca5b2",
+      "name": "CONSULTA BANCO",
       "credentials": {
-        "gmailOAuth2": {
-          "id": "Qm3UsXyf28rv7x8E",
-          "name": "Gmail account 6"
+        "supabaseApi": {
+          "id": "h72p2r0A8T6CTOHI",
+          "name": "Supabase account"
         }
       }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -176,
+        -224
+      ],
+      "id": "6d13dee8-397a-4db4-8eae-603725497e0e",
+      "name": "responseDashboard"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -608,
+        96
+      ],
+      "id": "71bd5634-ccf4-4bfa-9ece-a521aaa2b44a",
+      "name": "Schedule Trigger"
     },
     {
       "parameters": {
@@ -286,69 +338,37 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -48,
-        192
+        -96,
+        176
       ],
       "id": "2acfe17f-7b9b-4d72-ba02-1ecb8fab0396",
-      "name": "Call 'StackholderGenericoDashboard'"
+      "name": "StackholderGenericoDashboard"
     },
     {
       "parameters": {
-        "path": "dashboard",
-        "responseMode": "responseNode",
-        "options": {}
+        "fromEmail": "no-reply@codecohub.com",
+        "toEmail": "alisson.r.santos92@gmail.com",
+        "subject": "Alerta de Status Operacional",
+        "html": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false
+        }
       },
-      "type": "n8n-nodes-base.webhook",
+      "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        -272,
-        -240
+        368,
+        -16
       ],
-      "id": "fe18f43d-35a7-466b-b650-a88ae1e3e22b",
-      "name": "getDashboard",
-      "webhookId": "240e5d3c-d6b3-4b40-bb3c-237d324b0d19",
-      "alwaysOutputData": false
-    },
-    {
-      "parameters": {
-        "operation": "get",
-        "tableId": "report_info",
-        "filters": {
-          "conditions": [
-            {
-              "keyName": "report_id",
-              "keyValue": "={{ $json.query.uuid }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -48,
-        -240
-      ],
-      "id": "00d24bc4-d09b-47ed-866d-5d23541ca5b2",
-      "name": "CONSULTA BANCO",
+      "id": "579b1f65-e435-4a03-a0b8-8c55a5e426a4",
+      "name": "no-reply@codecohub.com",
+      "webhookId": "d89b2ad8-77c8-411c-b959-cd0e41b50bfe",
       "credentials": {
-        "supabaseApi": {
-          "id": "h72p2r0A8T6CTOHI",
-          "name": "Supabase account"
+        "smtp": {
+          "id": "AV4chaqq5dd63h5A",
+          "name": "SMTP account 12"
         }
       }
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [
-        176,
-        -240
-      ],
-      "id": "6d13dee8-397a-4db4-8eae-603725497e0e",
-      "name": "responseDashboard"
     }
   ],
   "pinData": {},
@@ -483,7 +503,7 @@
       "main": [
         [
           {
-            "node": "Envio do Email",
+            "node": "no-reply@codecohub.com",
             "type": "main",
             "index": 0
           }
@@ -494,12 +514,12 @@
       "main": [
         [
           {
-            "node": "Conversão para o HTML",
+            "node": "StackholderGenericoDashboard",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Call 'StackholderGenericoDashboard'",
+            "node": "Conversão para o HTML",
             "type": "main",
             "index": 0
           }
@@ -527,13 +547,29 @@
           }
         ]
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "StackeholderGenerico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "no-reply@codecohub.com": {
+      "main": [
+        []
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "3ab435aa-1deb-4c03-a6d7-24afab7b180e",
+  "versionId": "e818ea16-82c3-411e-aa0e-186a4675128c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
