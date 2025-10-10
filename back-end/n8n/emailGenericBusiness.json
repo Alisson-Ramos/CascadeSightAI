@@ -86,7 +86,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -288,
+        -272,
         416
       ],
       "name": "Call BuscaAPIs1",
@@ -257,17 +257,17 @@
       "main": [
         [
           {
-            "node": "Call BuscaAPIs1",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "UUID GERADOR",
             "type": "main",
             "index": 0
           },
           {
             "node": "JWT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Call BuscaAPIs1",
             "type": "main",
             "index": 0
           }
@@ -317,7 +317,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c1a7c714-6689-4e89-a650-4830b6f320df",
+  "versionId": "1b429bc1-63d8-408a-ab55-e425471b4be4",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "21b80bbe30a7f15da69548d8c5b1a235d4d21f49c50c6d7cd7bab88b61c1e138"
