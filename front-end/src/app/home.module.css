@@ -1,0 +1,87 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.mainContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* O gap não é mais necessário aqui */
+}
+
+/* ALTERADO: O wrapper da logo agora é um container flexível vertical */
+.logoWrapper {
+    /* Animações mantidas */
+    animation:
+        subtleFadeInUp 1.5s ease-out forwards,
+        softFloat 4s ease-in-out infinite,
+        subtleGlow 4s ease-in-out infinite;
+    animation-delay: 0s, 1.5s, 1.5s;
+
+    /* Novas propriedades para alinhar os itens internos */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    /* Espaço entre a logo e o "powered by" */
+
+    transform-origin: center;
+    will-change: transform, opacity, box-shadow;
+}
+
+
+.poweredByWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1.5s ease-out forwards;
+    animation-delay: 1.8s;
+}
+
+.poweredByText {
+    font-size: 0.9rem;
+    color: #888;
+    font-family: sans-serif;
+}
+
+
+/* Keyframes (sem alteração) */
+@keyframes subtleFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes softFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
